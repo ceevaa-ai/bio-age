@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthspan · Parth Bhatia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f2ee;--s1:#ffffff;--s2:#ffffff;--s3:#f0ede8;--s4:#e8e4de;
+  --br:#00000010;--br2:#00000018;--br3:#00000028;
+  --t1:#1a1714;--t2:#4a4540;--t3:#8a8278;--t4:#b0a898;
+  --red:#c0392b;--red2:#c0392b14;--red3:#c0392b28;
+  --grn:#1a7a52;--grn2:#1a7a5214;--grn3:#1a7a5228;
+  --amb:#9a6010;--amb2:#9a601014;--amb3:#9a601028;
+  --blu:#1a5fa0;--blu2:#1a5fa014;--blu3:#1a5fa028;
+  --pur:#6d4fc4;--pur2:#6d4fc414;
+  --r:8px;--r2:12px;
+  --ff:'Inter',-apple-system,sans-serif;
+  --fm:'DM Mono','Courier New',monospace;
+}
+html{background:var(--bg);color:var(--t1);font-family:var(--ff);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+body{max-width:1160px;margin:0 auto;padding:40px 24px 80px}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--br3)}
+.hdr-eyebrow{font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.hdr h1{font-size:26px;font-weight:700;letter-spacing:-.5px;color:var(--t1)}
+.hdr h1 span{color:var(--grn)}
+.hdr-right{font-family:var(--fm);font-size:10.5px;color:var(--t2);line-height:2.1;text-align:right}
+.hdr-right b{color:var(--t2);font-weight:500}
+
+/* SECTION */
+.sh{display:flex;justify-content:space-between;align-items:center;margin:32px 0 14px}
+.sh-t{font-family:var(--fm);font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)}
+.sh-n{font-size:11px;color:var(--t4)}
+
+/* HERO */
+.hero{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+.hc{background:var(--s2);border:1px solid var(--br2);border-radius:var(--r2);padding:18px 16px}
+.hc.accent{border-color:var(--grn3);background:#edf7f2}
+.hc-l{font-family:var(--fm);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:9px}
+.hc-v{font-size:32px;font-weight:700;letter-spacing:-.8px;line-height:1;color:var(--t1)}
+.hc.accent .hc-v{color:var(--grn)}
+.r{color:var(--red)}.g{color:var(--grn)}.a{color:var(--amb)}
+.hc-s{font-size:10.5px;color:var(--t3);margin-top:5px;line-height:1.4}
+.hc-badge{display:inline-block;font-family:var(--fm);font-size:8.5px;font-weight:500;padding:2px 8px;border-radius:4px;margin-top:7px}
+.badge-r{background:var(--red2);color:var(--red)}.badge-g{background:var(--grn2);color:var(--grn)}.badge-a{background:var(--amb2);color:var(--amb)}
+
+/* CARDS */
+.card{background:var(--s2);border:1px solid var(--br2);border-radius:var(--r2);padding:20px 22px;margin-bottom:12px}
+.ct{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.cd{font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.55}
+.cw{position:relative;width:100%}
+
+/* TABS */
+.tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--s3);border-radius:8px;padding:3px;width:fit-content}
+.tab{font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:5px 12px;border-radius:6px;border:none;background:transparent;color:var(--t3);cursor:pointer;transition:all .14s}
+.tab:hover{color:var(--t2)}
+.tab.on{background:var(--s4);color:var(--t1)}
+
+/* LEGEND */
+.leg{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:11px}
+.li{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t2)}
+.ll{width:16px;height:2.5px;border-radius:1px;flex-shrink:0}
+.ld{width:18px;height:0;flex-shrink:0}
+.lb{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.lc{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+
+/* PACE PAIR */
+.pace-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.pace-card{background:var(--s2);border:1px solid var(--br2);border-radius:var(--r2);padding:18px 20px}
+.pc-t{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.pc-s{font-size:11px;color:var(--t3);margin-bottom:14px;line-height:1.5}
+
+/* YEAR CARDS */
+.yr-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.yr{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:13px 14px}
+.yr.best{border-color:var(--grn3)}.yr.worst{border-color:var(--red3)}
+.yr-y{font-family:var(--fm);font-size:8.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.yr-b{font-size:20px;font-weight:700;color:var(--t1);line-height:1;letter-spacing:-.4px}
+.yr-d{font-family:var(--fm);font-size:10px;font-weight:600;margin-top:3px}
+.yr-n{font-size:12px;color:var(--t3);margin-top:4px;line-height:1.5}
+
+/* CONTRIBUTION TABLE */
+.ctbl{width:100%;border-collapse:collapse}
+.ctbl tr{border-bottom:1px solid var(--br)}
+.ctbl tr:last-child{border-bottom:none}
+.ctbl td{padding:10px 4px;font-size:13px;vertical-align:middle}
+.cn{width:130px;font-weight:500;color:var(--t2)}
+.cv{width:105px;font-family:var(--fm);font-size:10.5px;color:var(--t1)}
+.cbg{background:var(--s3);border-radius:3px;height:5px;overflow:hidden}
+.cfill{height:100%;border-radius:3px}
+.cd2{font-family:var(--fm);font-size:10.5px;width:46px;text-align:right;font-weight:600}
+.cdp{color:var(--red)}.cdn{color:var(--grn)}.cdz{color:var(--t4)}
+.cicon{width:18px;font-size:11px;text-align:center}
+
+/* CALLOUT */
+.callout{border-radius:var(--r);padding:13px 17px;font-size:12.5px;line-height:1.75;margin-bottom:12px;border-left:3px solid}
+.co-grn{background:#edf7f2;border-color:#1a7a52;color:#0f4a30}
+.co-red{background:#fdf0ee;border-color:#c0392b;color:#7a1a10}
+.co-amb{background:#fdf5e6;border-color:#9a6010;color:#5a3800}
+.co-blu{background:#edf3fc;border-color:#1a5fa0;color:#0a3060}
+.callout b{font-weight:600}
+
+/* INSIGHTS */
+.ins-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.ins{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:13px 14px}
+.ins-tag{font-family:var(--fm);font-size:8px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:7px}
+.tg{background:var(--grn2);color:var(--grn)}.tb{background:var(--red2);color:var(--red)}
+.ta{background:var(--amb2);color:var(--amb)}.tbl{background:var(--blu2);color:var(--blu)}
+.ins-v{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.ins-d{font-size:12px;color:var(--t3);line-height:1.55}
+
+/* SLEEP STAT ROW */
+.sleep-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.ss{background:var(--s3);border-radius:var(--r);padding:12px 14px;text-align:center}
+.ss-val{font-size:20px;font-weight:700;color:var(--t1);letter-spacing:-.4px;line-height:1}
+.ss-lbl{font-family:var(--fm);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:5px}
+.ss-val.r{color:var(--red)}.ss-val.a{color:var(--amb)}.ss-val.g{color:var(--grn)}
+
+/* PB BANNER */
+.pb-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.pb-c{background:var(--s2);border:1px solid var(--br2);border-radius:var(--r);padding:13px 15px}
+.pbl{font-family:var(--fm);font-size:8.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--blu);margin-bottom:4px}
+.pbv{font-size:20px;font-weight:700;color:var(--t1);line-height:1;letter-spacing:-.4px}
+.pbv.g{color:var(--grn)}.pbv.r{color:var(--red)}.pbv.a{color:var(--amb)}
+.pbs{font-size:10.5px;color:var(--t3);margin-top:3px}
+
+/* FN */
+.fn{font-family:var(--fm);font-size:9px;color:var(--t4);line-height:1.85;border-top:1px solid var(--br);padding-top:14px;margin-top:34px}
+
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero,.card,.yr-row,.pace-pair,.pb-row,.ins-g{animation:up .35s ease both}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="hdr-eyebrow">Personal Healthspan Report · Apple Watch SE2 · 1,343,728 records</div>
+    <h1>Biological Age <span>/ Parth Bhatia</span></h1>
+  </div>
+  <div class="hdr-right">Born <b>Apr 17, 1997</b><br>Dataset <b>Feb 2023 – Apr 2026</b><br>Method <b>WHOOP-aligned · 6-month rolling</b><br>Generated <b>Apr 22, 2026</b></div>
+</div>
+
+<!-- HERO -->
+<div class="sh"><span class="sh-t">Current status</span><span class="sh-n">6-month rolling average · Apr 2026</span></div>
+<div class="hero">
+  <div class="hc"><div class="hc-l">Chronological age</div><div class="hc-v">29.0</div><div class="hc-s">Apr 17, 1997</div></div>
+  <div class="hc accent"><div class="hc-l">Biological age</div><div class="hc-v">34.3</div><div class="hc-s">6-month rolling estimate</div><div class="hc-badge badge-r">+5.3 yrs ahead</div></div>
+  <div class="hc"><div class="hc-l">Lifetime aging rate</div><div class="hc-v a">1.18×</div><div class="hc-s">34.3 ÷ 29.0 — every calendar year added 1.18 bio years on average across your life</div></div>
+  <div class="hc"><div class="hc-l">Sleep drag</div><div class="hc-v r">+2.4 yrs</div><div class="hc-s">Duration + consistency combined — single largest contributor to the gap</div><div class="hc-badge badge-r">Biggest lever</div></div>
+</div>
+
+<!-- GAP CLOSING? -->
+<div class="sh"><span class="sh-t">Is the gap closing?</span><span class="sh-n">12-month comparison · Apr 2025 → Apr 2026</span></div>
+<div class="card" style="margin-bottom:18px">
+  <div class="ct">Bio-age gap — last 12 months</div>
+  <div class="cd">Gap narrowed from +5.89 yrs (Apr 2025) to +5.30 yrs (Apr 2026) — down 0.59 yrs. Pace: 0.41× (bio age moved +0.41 yrs while calendar moved +1.0 yr). Below 1.0× = gap is closing.</div>
+  <div class="cw" style="height:160px"><canvas id="cGap"></canvas></div>
+</div>
+
+<!-- YEAR BY YEAR -->
+<div class="sh"><span class="sh-t">Year by year</span><span class="sh-n">Avg bio-age gap per year</span></div>
+<div class="yr-row">
+  <div class="yr"><div class="yr-y">2023</div><div class="yr-b">31.3 avg</div><div class="yr-d" style="color:var(--amb)">+5.1 yrs delta</div><div class="yr-n">Baseline year. VO₂ appeared in May at 33.2 — immediate spike. Sleep short at 5.1–5.9h. H2 better than H1.</div></div>
+  <div class="yr worst"><div class="yr-y">2024 — worst</div><div class="yr-b">33.2 avg</div><div class="yr-d" style="color:var(--red)">+6.0 yrs delta</div><div class="yr-n">VO₂ fell to 32.6. HRV at 38–44ms. August delta hit +7.3 — dataset maximum. Watch sparse Apr–Aug.</div></div>
+  <div class="yr best"><div class="yr-y">2025 — improving</div><div class="yr-b">33.4 avg</div><div class="yr-d" style="color:var(--amb)">+5.2 yrs delta</div><div class="yr-n">Jan: HRV +12.5ms surge. Aug: pickleball peak cut gap 2.5 yrs in one month. H2 avg +4.3 vs H1 avg +6.1.</div></div>
+  <div class="yr"><div class="yr-y">2026 so far</div><div class="yr-b">33.8 avg</div><div class="yr-d" style="color:var(--amb)">+4.9 yrs delta</div><div class="yr-n">Steps 12,900/day — all-time best. Sleep consistency worst ever (Mar SD: 2.74h). HRV/RHR drifting.</div></div>
+</div>
+
+<!-- MAIN CHART -->
+<div class="sh"><span class="sh-t">Age trajectory + forecast</span><span class="sh-n">Solid = actual · Dotted = 2026–2027 projection</span></div>
+<div class="card">
+  <div class="ct">Biological age vs. chronological age</div>
+  <div class="cd">6-month rolling average of HRV, RHR, VO₂Max, steps, and sleep. Hover any point for full detail.</div>
+  <div class="tabs" id="mainTabs">
+    <button class="tab on" onclick="setV('all',this)">All time</button>
+    <button class="tab" onclick="setV('2023',this)">2023</button>
+    <button class="tab" onclick="setV('2024',this)">2024</button>
+    <button class="tab" onclick="setV('2025',this)">2025</button>
+    <button class="tab" onclick="setV('2026',this)">2026 + forecast</button>
+  </div>
+  <div class="leg">
+    <span class="li"><span class="ll" style="background:#ff4f4f"></span>Biological age</span>
+    <span class="li"><span class="ld" style="border-top:2px dashed rgba(255,79,79,.4)"></span>Scenario A: improvements hold</span>
+    <span class="li"><span class="ld" style="border-top:2px dashed rgba(255,170,0,.4)"></span>Scenario B: drift continues</span>
+    <span class="li"><span class="ll" style="background:#4da6ff"></span>Chronological age</span>
+  </div>
+  <div class="cw" style="height:300px"><canvas id="cMain"></canvas></div>
+  <div id="yr-txt" style="margin-top:13px;font-size:11.5px;color:var(--t2);line-height:1.85;padding-top:12px;border-top:1px solid var(--br)"></div>
+</div>
+
+<!-- METRIC TRENDS -->
+<div class="sh"><span class="sh-t">Metric trends</span><span class="sh-n">Monthly values · dashed = optimal reference</span></div>
+<div class="g2">
+  <div class="card" style="margin-bottom:0"><div class="ct">HRV (SDNN)</div><div class="cd">Monthly avg · Optimal ≥55ms · Current 6-mo: 44.6ms</div><div class="cw" style="height:148px"><canvas id="cHrv"></canvas></div></div>
+  <div class="card" style="margin-bottom:0"><div class="ct">Resting heart rate</div><div class="cd">Monthly avg · Optimal ≤58 bpm · Current 6-mo: 63.6 bpm</div><div class="cw" style="height:148px"><canvas id="cRhr"></canvas></div></div>
+</div>
+<div style="height:10px"></div>
+<div class="g2">
+  <div class="card" style="margin-bottom:0"><div class="ct">VO₂ Max</div><div class="cd">Most recent per month · Optimal ≥43 ml/kg/min · Current: 36.7</div><div class="cw" style="height:148px"><canvas id="cVo2"></canvas></div></div>
+  <div class="card" style="margin-bottom:0"><div class="ct">Daily steps</div><div class="cd">Monthly avg · Optimal 8,500+ · Current: 12,900/day</div><div class="cw" style="height:148px"><canvas id="cStp"></canvas></div></div>
+</div>
+
+<!-- SLEEP SECTION -->
+<div class="sh"><span class="sh-t">Sleep deep-dive</span><span class="sh-n">256 nights recorded across 26 months</span></div>
+
+<div class="sleep-stats">
+  <div class="ss"><div class="ss-val r">03:01</div><div class="ss-lbl">Avg bedtime</div></div>
+  <div class="ss"><div class="ss-val">09:57</div><div class="ss-lbl">Avg wake time</div></div>
+  <div class="ss"><div class="ss-val r">5.5h</div><div class="ss-lbl">Avg sleep duration</div></div>
+  <div class="ss"><div class="ss-val r">1.8h</div><div class="ss-lbl">Avg bedtime SD</div></div>
+</div>
+
+<div class="callout co-red">
+  Bedtime drifted <b>3.5 hours later</b> over 3 years — 01:18 (2023) → 04:27 (2026). Wake time barely moved. Sleep window compressed.
+</div>
+<div class="callout co-amb">
+  <b>Sep 2025</b>: bed 06:27, wake 12:01 — likely heavy travel. <b>Mar 2026</b> SD 5.37h across 24 nights — dataset worst, driving the current bio-age uptick.
+</div>
+<div class="callout co-grn">
+  <b>Oct–Nov 2023</b>: best consistency in dataset — bed 00:23, SD 1.05h, duration 6.5h. Your BrowserStack schedule was objectively healthier.
+</div>
+
+<div class="card">
+  <div class="ct">Bedtime &amp; wake time trends — by job era</div>
+  <div class="cd">Axis inverted — lines moving <b style="color:#ff6b88">down</b> = later bedtime. Blue bars = sleep duration (right axis). Coloured background bands = job era. Each era tells a distinct sleep story.</div>
+  <div class="leg" style="margin-bottom:10px;padding:8px 0;border-top:1px solid var(--br2);border-bottom:1px solid var(--br2)">
+    <span style="font-family:var(--fm);font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-right:6px">Job era:</span>
+    <span class="li"><span class="lb" style="background:#d8e4f8;border:2px solid #4a80c0"></span><span style="color:#4a80c0;font-weight:500">HighRadius</span></span>
+    <span class="li"><span class="lb" style="background:#d0e8ff;border:2px solid #1a5fa0"></span><span style="color:#1a5fa0;font-weight:500">BrowserStack</span></span>
+    <span class="li"><span class="lb" style="background:#ffe8b0;border:2px solid #c07010"></span><span style="color:#c07010;font-weight:500">Soroco</span></span>
+    <span class="li"><span class="lb" style="background:#e8d8ff;border:2px solid #6d3fb0"></span><span style="color:#6d3fb0;font-weight:500">Taloop</span></span>
+    <span class="li"><span class="lb" style="background:#c8f0e0;border:2px solid #0a7a50"></span><span style="color:#0a7a50;font-weight:500">CeeVaa</span></span>
+  </div>
+<div class="tabs" id="sleepTabs">
+    <button class="tab on" onclick="setSleepV('all',this)">All time</button>
+    <button class="tab" onclick="setSleepV('2023',this)">2023</button>
+    <button class="tab" onclick="setSleepV('2024',this)">2024</button>
+    <button class="tab" onclick="setSleepV('2025',this)">2025</button>
+    <button class="tab" onclick="setSleepV('2026',this)">2026</button>
+  </div>
+  <div class="leg">
+    <span class="li"><span class="ll" style="background:#ff6b88"></span>Avg bedtime (left, inverted)</span>
+    <span class="li"><span class="ld" style="border-top:2px dashed rgba(255,107,136,0.45)"></span>Bed trend</span>
+    <span class="li"><span class="ll" style="background:#ffcc44"></span>Avg wake time (left)</span>
+    <span class="li"><span class="ld" style="border-top:2px dashed rgba(255,204,68,0.45)"></span>Wake trend</span>
+    <span class="li"><span class="lb" style="background:rgba(77,166,255,.35);border:1px solid rgba(77,166,255,.55)"></span>Sleep duration (right)</span>
+  </div>
+  <div class="cw" style="height:240px"><canvas id="cSleepTrend"></canvas></div>
+  <div id="sleep-txt" style="margin-top:13px;font-size:11.5px;color:var(--t2);line-height:1.85;padding-top:12px;border-top:1px solid var(--br)"></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+  <div class="callout co-blu" style="margin-bottom:0">
+    <b>BrowserStack</b> · Oct 2022 – May 2024<br>
+    Bed <b>1:06am</b> · Wake <b>9:33am</b> · Sleep <b>5.5h</b> · 103 nights<br>
+    <span style="color:#1a4a7a">Most consistent era. Fixed office hours anchored the schedule (SD ~1.2h). Earliest bedtime in the dataset.</span>
+  </div>
+  <div class="callout co-amb" style="margin-bottom:0">
+    <b>Soroco</b> · May – Dec 2024<br>
+    Bed <b>no data</b> · Wake <b>no data</b> · Sleep <b>~6.8h</b> · 2 nights only<br>
+    <span style="opacity:.8">Watch almost entirely unworn. Bio-age model shows worst cardiovascular readings (VO₂ 32.6, HRV 38ms). Short tenure, high-stress period.</span>
+  </div>
+  <div class="callout co-red" style="margin-bottom:0">
+    <b>Taloop</b> · Jan – Oct 2025<br>
+    Bed <b>3:59am</b> · Wake <b>9:47am</b> · Sleep <b>5.6h</b> · 52 nights<br>
+    <span style="color:#7a1a10">Bedtime jumped 3h vs BrowserStack overnight. No schedule anchor. SD hit 2.18h in Jul.</span>
+  </div>
+  <div class="callout co-grn" style="margin-bottom:0">
+    <b>CeeVaa</b> · Nov 2025 – present<br>
+    Bed <b>4:27am</b> · Wake <b>10:14am</b> · Sleep <b>5.5h</b> · 99 nights<br>
+    <span style="color:#0f4a30">Best data coverage, worst consistency. Mar 2026 SD 5.37h — dataset max. Steps all-time high. Activity up, sleep discipline down.</span>
+  </div>
+</div>
+
+<!-- PICKLEBALL -->
+<div class="sh"><span class="sh-t">Pickleball: did it close the gap?</span><span class="sh-n">86 sessions · Jun 2025 – Apr 2026 · avg 82 min/session</span></div>
+<div class="pb-row">
+  <div class="pb-c"><div class="pbl">Gap before PB era</div><div class="pbv r">+5.9 yrs</div><div class="pbs">Avg Jan–May 2025</div></div>
+  <div class="pb-c"><div class="pbl">Gap at peak PB</div><div class="pbv g">+4.2 yrs</div><div class="pbs">Avg Aug–Nov 2025</div></div>
+  <div class="pb-c"><div class="pbl">Gap closed by PB</div><div class="pbv g">−1.7 yrs</div><div class="pbs">Attributable to PB volume</div></div>
+  <div class="pb-c"><div class="pbl">Gap now (lower volume)</div><div class="pbv a">+5.3 yrs</div><div class="pbs">Apr 2026 — partial reversal</div></div>
+</div>
+<div class="card">
+  <div class="ct">Pickleball volume vs. bio-age gap</div>
+  <div class="cd">Blue bars = pickleball hours/month. Red line = bio-age gap. The relationship is direct and visible: more pickleball → gap shrinks. Less → gap widens.</div>
+  <div class="leg">
+    <span class="li"><span class="ll" style="background:var(--red)"></span>Bio-age gap (left axis)</span>
+    <span class="li"><span class="lb" style="background:rgba(77,166,255,.3);border:1px solid rgba(77,166,255,.55)"></span>Pickleball hrs/month (right)</span>
+  </div>
+  <div class="cw" style="height:220px"><canvas id="cPbGap"></canvas></div>
+</div>
+
+<!-- CONTRIBUTION + PRIORITY -->
+<div class="sh"><span class="sh-t">What's driving the gap</span><span class="sh-n">Apr 2026 · all contributors ranked by magnitude</span></div>
+<div class="g2">
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">Contribution breakdown</div>
+    <div class="cd">Each metric's bio-age delta. Pickleball/activity shown as an indirect multiplier — it works through RHR, HRV, and VO₂, which are already listed.</div>
+    <table class="ctbl" id="ctbl"></table>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--br);font-size:11px;color:var(--t3);line-height:1.7">
+      <span style="color:var(--blu);font-weight:500">Pickleball/workouts</span> act as a <i>multiplier</i> on existing metrics — not a separate driver. At peak volume (Aug–Nov 2025), pickleball indirectly reduced the gap by <span style="color:var(--grn);font-weight:600">−1.7 yrs</span> via improved VO₂, RHR, and steps. Counting it separately would double-count those gains.
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">Action priority</div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.9">
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--br)"><span style="font-weight:600;color:var(--red)">① Fix bedtime · saves ~1.1 yrs</span><br>Move bedtime from 03:01 to 01:00 (2023 baseline). Consistency matters more than the exact time — ±30min variance removes the consistency penalty entirely.</div>
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--br)"><span style="font-weight:600;color:var(--red)">② Sleep longer · saves ~1.3 yrs</span><br>Get from 5.5h to 7h actual sleep. Combined with ①, these two moves alone close 2.4 yrs of the gap.</div>
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--br)"><span style="font-weight:600;color:var(--amb)">③ Pickleball volume · saves ~1.7 yrs</span><br>Peak era (25+ sessions/month) drove the best bio-age readings in the dataset. Currently at 7 sessions in Apr 2026 — far below the effective threshold.</div>
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--br)"><span style="font-weight:600;color:var(--amb)">④ VO₂Max · saves ~2.0 yrs</span><br>36.7 vs 43+ optimal. Zone 4–5 intervals beyond pickleball will move this. Each +1 unit = −0.32 bio years.</div>
+      <div><span style="font-weight:600;color:var(--grn)">✓ Steps · already saving −0.8 yrs</span><br>12,900/day. Top decile for your age. Keep it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="sh"><span class="sh-t">Key findings</span><span class="sh-n">3 years · 1.3M records</span></div>
+<div class="ins-g">
+  <div class="ins"><div class="ins-tag tb">Sleep is the gap</div><div class="ins-v">+2.4 yrs from sleep</div><div class="ins-d">Duration and consistency combined exceed all cardiovascular metrics. Your 2023 sleep schedule (avg 01:18 bedtime, 5.4h duration) was meaningfully better than now.</div></div>
+  <div class="ins"><div class="ins-tag tbl">Pickleball is proven</div><div class="ins-v">−1.7 yrs at peak</div><div class="ins-d">Pre-PB gap: +5.9 yrs. Peak-PB gap: +4.2 yrs. The dose-response in the chart is unambiguous. 25+ sessions/month is the effective threshold.</div></div>
+  <div class="ins"><div class="ins-tag tb">2024 was worst</div><div class="ins-v">+7.3 yrs peak delta</div><div class="ins-d">Aug 2024 is the all-time dataset maximum. VO₂ at 32.6, HRV at 37.9ms, sparse watch wear. This is the baseline to avoid returning to.</div></div>
+  <div class="ins"><div class="ins-tag ta">Bedtime drifted 3.5h</div><div class="ins-v">01:18 → 04:31</div><div class="ins-d">2023 avg bedtime was 01:18. By 2026 it's 04:31. Wake time barely changed. This is the single most visible behavioural change in the full dataset.</div></div>
+  <div class="ins"><div class="ins-tag tg">Steps are the anchor</div><div class="ins-v">−0.8 yrs saved</div><div class="ins-d">Without 12,900/day steps the delta would be +6.1. Consistent through every period including the 2024 downturn. The one metric that never slipped.</div></div>
+  <div class="ins"><div class="ins-tag tg">Target: delta ≤+1.5</div><div class="ins-v">Two real levers</div><div class="ins-d">Sleep back to 2023 schedule (−2.4 yrs) + sustain 25+ PB sessions/month (−1.7 yrs). Steps already there. Lifetime rate drops below 1.05×.</div></div>
+</div>
+
+<div class="callout co-grn">
+  Gap narrowed <b>0.59 yrs</b> over the last 12 months (pace: 0.41×). H2 2025 avg gap +4.3 yrs — best 6-month window in the dataset. Hold improvements → gap below +4.5 by end-2027.
+</div>
+
+<div class="fn">
+  Model: Bio age = chron age + Σ metric deltas. HRV SDNN: asymmetric ±0.06–0.08/ms vs 55ms ref. RHR: 0.15/bpm above 58. VO₂Max: 0.32/unit below 43. Steps: tiered (≥10k=−0.8 … &lt;4k=+1.8). Sleep duration: 7–9h=0, 6–7h=+0.6, 5–6h=+1.3, &lt;5h=+2.2. Sleep consistency SD: ≤0.5h=−0.4, ≤1h=0, ≤1.5h=+0.6, ≤2h=+1.1, &gt;2h=+1.7. 6-month rolling windows. 256 sleep nights across 26 months. Projection A: 0.41× pace. Projection B: 3.65× moderating to 1.5×. Sources: WHOOP Healthspan White Paper 2025; Nes 2013 HRV mortality; Paluch 2022 steps; Walker 2017 sleep; Phillips 2017 consistency. Not medical advice.
+</div>
+
+<script>
+var B={"monthly":[{"m":"2023-01","chron":25.75,"bio":26.55,"delta":0.8,"rhr":null,"hrv":null,"vo2":null,"steps":4212.0,"sleep_hrs":null,"sleep_sd":null,"sleep_nights":0,"parts":{"steps":0.8},"pb_hrs":0},{"m":"2023-02","chron":25.83,"bio":31.62,"delta":5.79,"rhr":70.0,"hrv":42.6,"vo2":null,"steps":4549.0,"sleep_hrs":4.65,"sleep_sd":0.9,"sleep_nights":4,"parts":{"rhr":1.8,"hrv":0.99,"steps":0.8,"sleep_dur":2.2,"sleep_consist":0.0},"pb_hrs":0},{"m":"2023-03","chron":25.91,"bio":32.11,"delta":6.2,"rhr":67.0,"hrv":39.5,"vo2":null,"steps":5813.0,"sleep_hrs":4.79,"sleep_sd":1.03,"sleep_nights":10,"parts":{"rhr":1.36,"hrv":1.24,"steps":0.8,"sleep_dur":2.2,"sleep_consist":0.6},"pb_hrs":0},{"m":"2023-04","chron":25.99,"bio":30.87,"delta":4.88,"rhr":68.0,"hrv":36.5,"vo2":null,"steps":6127.0,"sleep_hrs":5.13,"sleep_sd":1.01,"sleep_nights":15,"parts":{"rhr":1.5,"hrv":1.48,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2023-05","chron":26.08,"bio":33.87,"delta":7.79,"rhr":67.0,"hrv":37.6,"vo2":33.16,"steps":6330.0,"sleep_hrs":5.22,"sleep_sd":1.04,"sleep_nights":30,"parts":{"rhr":1.35,"hrv":1.39,"vo2":3.15,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2023-06","chron":26.16,"bio":32.63,"delta":6.47,"rhr":64.1,"hrv":41.1,"vo2":33.16,"steps":6673.0,"sleep_hrs":5.18,"sleep_sd":1.0,"sleep_nights":36,"parts":{"rhr":0.91,"hrv":1.11,"vo2":3.15,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.0},"pb_hrs":0},{"m":"2023-07","chron":26.24,"bio":31.28,"delta":5.04,"rhr":63.0,"hrv":42.1,"vo2":36.89,"steps":7942.0,"sleep_hrs":5.18,"sleep_sd":1.0,"sleep_nights":36,"parts":{"rhr":0.75,"hrv":1.03,"vo2":1.96,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.0},"pb_hrs":0},{"m":"2023-08","chron":26.33,"bio":31.16,"delta":4.83,"rhr":63.2,"hrv":41.4,"vo2":37.79,"steps":8386.0,"sleep_hrs":5.18,"sleep_sd":1.0,"sleep_nights":36,"parts":{"rhr":0.78,"hrv":1.09,"vo2":1.67,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.0},"pb_hrs":0},{"m":"2023-09","chron":26.41,"bio":31.65,"delta":5.24,"rhr":62.2,"hrv":41.9,"vo2":37.79,"steps":7285.0,"sleep_hrs":5.5,"sleep_sd":1.18,"sleep_nights":50,"parts":{"rhr":0.62,"hrv":1.05,"vo2":1.67,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2023-10","chron":26.49,"bio":31.46,"delta":4.97,"rhr":62.2,"hrv":43.3,"vo2":38.3,"steps":7700.0,"sleep_hrs":5.88,"sleep_sd":1.19,"sleep_nights":65,"parts":{"rhr":0.63,"hrv":0.93,"vo2":1.51,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2023-11","chron":26.58,"bio":31.01,"delta":4.43,"rhr":62.3,"hrv":42.8,"vo2":38.9,"steps":9623.0,"sleep_hrs":5.69,"sleep_sd":1.28,"sleep_nights":78,"parts":{"rhr":0.64,"hrv":0.97,"vo2":1.31,"steps":-0.4,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2023-12","chron":26.66,"bio":31.0,"delta":4.34,"rhr":63.1,"hrv":41.5,"vo2":38.65,"steps":10739.0,"sleep_hrs":5.78,"sleep_sd":1.27,"sleep_nights":68,"parts":{"rhr":0.77,"hrv":1.08,"vo2":1.39,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-01","chron":26.75,"bio":31.49,"delta":4.74,"rhr":64.6,"hrv":40.5,"vo2":38.35,"steps":10872.0,"sleep_hrs":5.86,"sleep_sd":1.46,"sleep_nights":64,"parts":{"rhr":0.99,"hrv":1.16,"vo2":1.49,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-02","chron":26.83,"bio":31.66,"delta":4.83,"rhr":64.7,"hrv":40.7,"vo2":38.07,"steps":11295.0,"sleep_hrs":5.84,"sleep_sd":1.47,"sleep_nights":67,"parts":{"rhr":1.01,"hrv":1.14,"vo2":1.58,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-03","chron":26.91,"bio":31.54,"delta":4.63,"rhr":64.1,"hrv":42.0,"vo2":38.07,"steps":11800.0,"sleep_hrs":5.84,"sleep_sd":1.47,"sleep_nights":67,"parts":{"rhr":0.91,"hrv":1.04,"vo2":1.58,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-04","chron":27.0,"bio":31.63,"delta":4.63,"rhr":63.6,"hrv":41.9,"vo2":37.88,"steps":11267.0,"sleep_hrs":5.8,"sleep_sd":1.4,"sleep_nights":49,"parts":{"rhr":0.84,"hrv":1.05,"vo2":1.64,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-05","chron":27.08,"bio":32.75,"delta":5.67,"rhr":63.8,"hrv":42.4,"vo2":35.84,"steps":8986.0,"sleep_hrs":5.27,"sleep_sd":1.44,"sleep_nights":28,"parts":{"rhr":0.86,"hrv":1.01,"vo2":2.29,"steps":-0.4,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-06","chron":27.16,"bio":33.82,"delta":6.66,"rhr":64.3,"hrv":41.9,"vo2":34.32,"steps":7304.0,"sleep_hrs":5.76,"sleep_sd":1.41,"sleep_nights":11,"parts":{"rhr":0.94,"hrv":1.04,"vo2":2.78,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-07","chron":27.24,"bio":34.11,"delta":6.87,"rhr":63.4,"hrv":41.4,"vo2":33.39,"steps":6173.0,"sleep_hrs":5.92,"sleep_sd":1.44,"sleep_nights":7,"parts":{"rhr":0.81,"hrv":1.08,"vo2":3.08,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-08","chron":27.33,"bio":34.6,"delta":7.27,"rhr":60.4,"hrv":43.8,"vo2":32.64,"steps":5354.0,"sleep_hrs":5.87,"sleep_sd":1.33,"sleep_nights":5,"parts":{"rhr":0.36,"hrv":0.9,"vo2":3.31,"steps":0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-09","chron":27.41,"bio":34.11,"delta":6.7,"rhr":62.1,"hrv":37.9,"vo2":32.64,"steps":5102.0,"sleep_hrs":null,"sleep_sd":1.23,"sleep_nights":2,"parts":{"rhr":0.62,"hrv":1.37,"vo2":3.31,"steps":0.8,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-10","chron":27.5,"bio":33.97,"delta":6.47,"rhr":60.9,"hrv":38.4,"vo2":32.64,"steps":4942.0,"sleep_hrs":null,"sleep_sd":1.23,"sleep_nights":2,"parts":{"rhr":0.43,"hrv":1.33,"vo2":3.31,"steps":0.8,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-11","chron":27.58,"bio":34.02,"delta":6.44,"rhr":60.6,"hrv":38.2,"vo2":32.64,"steps":5517.0,"sleep_hrs":null,"sleep_sd":1.23,"sleep_nights":2,"parts":{"rhr":0.38,"hrv":1.34,"vo2":3.31,"steps":0.8,"sleep_consist":0.6},"pb_hrs":0},{"m":"2024-12","chron":27.66,"bio":34.6,"delta":6.94,"rhr":60.1,"hrv":38.7,"vo2":32.64,"steps":5588.0,"sleep_hrs":6.04,"sleep_sd":1.26,"sleep_nights":21,"parts":{"rhr":0.32,"hrv":1.31,"vo2":3.31,"steps":0.8,"sleep_dur":0.6,"sleep_consist":0.6},"pb_hrs":0},{"m":"2025-01","chron":27.75,"bio":33.06,"delta":5.31,"rhr":58.2,"hrv":51.2,"vo2":33.36,"steps":6696.0,"sleep_hrs":6.0,"sleep_sd":1.25,"sleep_nights":20,"parts":{"rhr":0.03,"hrv":0.3,"vo2":3.08,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2025-02","chron":27.83,"bio":33.23,"delta":5.4,"rhr":59.0,"hrv":51.6,"vo2":33.36,"steps":6423.0,"sleep_hrs":5.96,"sleep_sd":1.32,"sleep_nights":19,"parts":{"rhr":0.15,"hrv":0.28,"vo2":3.08,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2025-03","chron":27.91,"bio":32.8,"delta":4.89,"rhr":59.2,"hrv":51.0,"vo2":33.36,"steps":6128.0,"sleep_hrs":5.81,"sleep_sd":0.97,"sleep_nights":22,"parts":{"rhr":0.19,"hrv":0.32,"vo2":3.08,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.0},"pb_hrs":0},{"m":"2025-04","chron":27.99,"bio":33.88,"delta":5.89,"rhr":60.8,"hrv":48.9,"vo2":33.36,"steps":6210.0,"sleep_hrs":5.85,"sleep_sd":1.38,"sleep_nights":24,"parts":{"rhr":0.42,"hrv":0.49,"vo2":3.08,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2025-05","chron":28.08,"bio":34.94,"delta":6.86,"rhr":61.6,"hrv":48.4,"vo2":33.36,"steps":5907.0,"sleep_hrs":5.97,"sleep_sd":1.38,"sleep_nights":29,"parts":{"rhr":0.54,"hrv":0.53,"vo2":3.08,"steps":0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2025-06","chron":28.16,"bio":34.77,"delta":6.61,"rhr":61.4,"hrv":47.4,"vo2":33.36,"steps":6025.0,"sleep_hrs":5.87,"sleep_sd":1.55,"sleep_nights":43,"parts":{"rhr":0.52,"hrv":0.61,"vo2":3.08,"steps":0.0,"sleep_dur":1.3,"sleep_consist":1.1},"pb_hrs":6.3},{"m":"2025-07","chron":28.24,"bio":35.21,"delta":6.97,"rhr":61.3,"hrv":46.5,"vo2":33.36,"steps":5880.0,"sleep_hrs":5.76,"sleep_sd":1.4,"sleep_nights":47,"parts":{"rhr":0.5,"hrv":0.68,"vo2":3.08,"steps":0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":29.3},{"m":"2025-08","chron":28.33,"bio":32.77,"delta":4.44,"rhr":60.2,"hrv":47.5,"vo2":37.96,"steps":6999.0,"sleep_hrs":5.57,"sleep_sd":1.25,"sleep_nights":33,"parts":{"rhr":0.33,"hrv":0.6,"vo2":1.61,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":36.1},{"m":"2025-09","chron":28.41,"bio":32.93,"delta":4.52,"rhr":60.2,"hrv":46.6,"vo2":37.96,"steps":8306.0,"sleep_hrs":5.57,"sleep_sd":1.25,"sleep_nights":33,"parts":{"rhr":0.33,"hrv":0.67,"vo2":1.61,"steps":0.0,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":13.2},{"m":"2025-10","chron":28.5,"bio":32.5,"delta":4.0,"rhr":59.6,"hrv":46.8,"vo2":37.96,"steps":8536.0,"sleep_hrs":5.76,"sleep_sd":1.43,"sleep_nights":43,"parts":{"rhr":0.24,"hrv":0.65,"vo2":1.61,"steps":-0.4,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":12.5},{"m":"2025-11","chron":28.58,"bio":32.5,"delta":3.92,"rhr":59.4,"hrv":47.5,"vo2":37.96,"steps":9350.0,"sleep_hrs":5.68,"sleep_sd":1.34,"sleep_nights":50,"parts":{"rhr":0.21,"hrv":0.6,"vo2":1.61,"steps":-0.4,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":5.1},{"m":"2025-12","chron":28.66,"bio":32.66,"delta":4.0,"rhr":59.8,"hrv":47.3,"vo2":37.96,"steps":9698.0,"sleep_hrs":5.75,"sleep_sd":1.31,"sleep_nights":65,"parts":{"rhr":0.27,"hrv":0.62,"vo2":1.61,"steps":-0.4,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0},{"m":"2026-01","chron":28.75,"bio":32.63,"delta":3.88,"rhr":61.2,"hrv":46.5,"vo2":37.96,"steps":10124.0,"sleep_hrs":5.59,"sleep_sd":1.29,"sleep_nights":68,"parts":{"rhr":0.49,"hrv":0.68,"vo2":1.61,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":0.6},"pb_hrs":0.9},{"m":"2026-02","chron":28.83,"bio":33.98,"delta":5.15,"rhr":62.8,"hrv":44.9,"vo2":36.67,"steps":11067.0,"sleep_hrs":5.58,"sleep_sd":1.64,"sleep_nights":88,"parts":{"rhr":0.72,"hrv":0.8,"vo2":2.03,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":1.1},"pb_hrs":1.5},{"m":"2026-03","chron":28.91,"bio":34.14,"delta":5.23,"rhr":63.4,"hrv":45.0,"vo2":36.67,"steps":11430.0,"sleep_hrs":5.49,"sleep_sd":1.79,"sleep_nights":99,"parts":{"rhr":0.81,"hrv":0.8,"vo2":2.03,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":1.1},"pb_hrs":6.1},{"m":"2026-04","chron":28.99,"bio":34.29,"delta":5.3,"rhr":63.6,"hrv":44.6,"vo2":36.67,"steps":12956.0,"sleep_hrs":5.49,"sleep_sd":1.79,"sleep_nights":99,"parts":{"rhr":0.85,"hrv":0.83,"vo2":2.03,"steps":-0.8,"sleep_dur":1.3,"sleep_consist":1.1},"pb_hrs":6.7}],"sleep_raw":{"2023-03":{"nights":4,"avg_hrs":4.65,"bed_sd":0.9,"deep_hrs":0.91,"rem_hrs":0.75},"2023-04":{"nights":6,"avg_hrs":4.89,"bed_sd":1.17,"deep_hrs":0.94,"rem_hrs":0.99},"2023-05":{"nights":5,"avg_hrs":5.79,"bed_sd":0.97,"deep_hrs":0.92,"rem_hrs":1.17},"2023-06":{"nights":15,"avg_hrs":5.32,"bed_sd":1.12,"deep_hrs":0.79,"rem_hrs":1.05},"2023-07":{"nights":6,"avg_hrs":4.96,"bed_sd":0.84,"deep_hrs":0.88,"rem_hrs":0.98},"2023-10":{"nights":18,"avg_hrs":5.94,"bed_sd":1.82,"deep_hrs":0.97,"rem_hrs":1.17},"2023-11":{"nights":21,"avg_hrs":6.51,"bed_sd":1.22,"deep_hrs":0.94,"rem_hrs":1.28},"2023-12":{"nights":18,"avg_hrs":5.05,"bed_sd":1.42,"deep_hrs":0.95,"rem_hrs":1.04},"2024-01":{"nights":5,"avg_hrs":5.73,"bed_sd":1.07,"deep_hrs":0.93,"rem_hrs":1.34},"2024-02":{"nights":2,"avg_hrs":6.05,"bed_sd":1.75,"deep_hrs":0.83,"rem_hrs":1.29},"2024-03":{"nights":3,"avg_hrs":5.29,"bed_sd":1.52,"deep_hrs":1.09,"rem_hrs":1.03},"2024-07":{"nights":1,"avg_hrs":6.75,"bed_sd":1.3,"deep_hrs":1.04,"rem_hrs":0.95},"2024-08":{"nights":1,"avg_hrs":6.75,"bed_sd":1.17,"deep_hrs":1.21,"rem_hrs":1.38},"2025-01":{"nights":19,"avg_hrs":5.96,"bed_sd":1.32,"deep_hrs":0.94,"rem_hrs":1.37},"2025-04":{"nights":3,"avg_hrs":4.89,"bed_sd":0.61,"deep_hrs":0.88,"rem_hrs":1.0},"2025-05":{"nights":2,"avg_hrs":6.25,"bed_sd":2.2,"deep_hrs":0.88,"rem_hrs":0.9},"2025-06":{"nights":5,"avg_hrs":6.54,"bed_sd":1.38,"deep_hrs":1.27,"rem_hrs":1.45},"2025-07":{"nights":14,"avg_hrs":5.67,"bed_sd":2.24,"deep_hrs":0.89,"rem_hrs":1.18},"2025-08":{"nights":4,"avg_hrs":4.58,"bed_sd":0.64,"deep_hrs":0.91,"rem_hrs":0.91},"2025-09":{"nights":5,"avg_hrs":5.25,"bed_sd":0.44,"deep_hrs":0.83,"rem_hrs":1.17},"2025-11":{"nights":13,"avg_hrs":6.05,"bed_sd":1.65,"deep_hrs":0.86,"rem_hrs":1.48},"2025-12":{"nights":9,"avg_hrs":5.4,"bed_sd":1.72,"deep_hrs":0.8,"rem_hrs":1.06},"2026-01":{"nights":20,"avg_hrs":6.12,"bed_sd":1.15,"deep_hrs":0.9,"rem_hrs":1.37},"2026-02":{"nights":17,"avg_hrs":5.06,"bed_sd":2.17,"deep_hrs":0.92,"rem_hrs":1.14},"2026-03":{"nights":24,"avg_hrs":5.37,"bed_sd":2.74,"deep_hrs":0.84,"rem_hrs":1.13},"2026-04":{"nights":16,"avg_hrs":4.93,"bed_sd":1.33,"deep_hrs":0.9,"rem_hrs":1.06}},"sleep_timing":{"2023-03":{"avg_bed_h":2.34,"avg_wake_h":9.71,"sd_bed":1.46,"n":4,"bed_str":"02:20","wake_str":"09:42"},"2023-04":{"avg_bed_h":2.08,"avg_wake_h":9.9,"sd_bed":1.27,"n":6,"bed_str":"02:04","wake_str":"09:54"},"2023-05":{"avg_bed_h":0.95,"avg_wake_h":9.43,"sd_bed":1.58,"n":5,"bed_str":"00:57","wake_str":"09:25"},"2023-06":{"avg_bed_h":1.11,"avg_wake_h":9.29,"sd_bed":1.26,"n":15,"bed_str":"01:06","wake_str":"09:17"},"2023-07":{"avg_bed_h":1.4,"avg_wake_h":9.82,"sd_bed":1.17,"n":6,"bed_str":"01:24","wake_str":"09:49"},"2023-10":{"avg_bed_h":0.4,"avg_wake_h":9.47,"sd_bed":1.05,"n":18,"bed_str":"00:23","wake_str":"09:28"},"2023-11":{"avg_bed_h":1.04,"avg_wake_h":10.07,"sd_bed":1.15,"n":21,"bed_str":"01:02","wake_str":"10:04"},"2023-12":{"avg_bed_h":1.08,"avg_wake_h":9.77,"sd_bed":1.17,"n":18,"bed_str":"01:05","wake_str":"09:46"},"2024-01":{"avg_bed_h":1.26,"avg_wake_h":9.5,"sd_bed":1.54,"n":5,"bed_str":"01:15","wake_str":"09:29"},"2024-02":{"avg_bed_h":0.1,"avg_wake_h":9.03,"sd_bed":null,"n":2,"bed_str":"00:06","wake_str":"09:01"},"2024-03":{"avg_bed_h":0.29,"avg_wake_h":9.13,"sd_bed":0.62,"n":3,"bed_str":"00:17","wake_str":"09:07"},"2025-01":{"avg_bed_h":4.23,"avg_wake_h":10.46,"sd_bed":1.69,"n":19,"bed_str":"04:13","wake_str":"10:27"},"2025-04":{"avg_bed_h":4.27,"avg_wake_h":9.37,"sd_bed":0.62,"n":3,"bed_str":"04:15","wake_str":"09:22"},"2025-05":{"avg_bed_h":1.76,"avg_wake_h":8.18,"sd_bed":null,"n":2,"bed_str":"01:45","wake_str":"08:10"},"2025-06":{"avg_bed_h":2.83,"avg_wake_h":9.66,"sd_bed":1.68,"n":5,"bed_str":"02:49","wake_str":"09:39"},"2025-07":{"avg_bed_h":3.9,"avg_wake_h":9.63,"sd_bed":2.18,"n":14,"bed_str":"03:53","wake_str":"09:37"},"2025-08":{"avg_bed_h":4.45,"avg_wake_h":9.21,"sd_bed":0.75,"n":4,"bed_str":"04:27","wake_str":"09:12"},"2025-09":{"avg_bed_h":6.46,"avg_wake_h":12.02,"sd_bed":2.63,"n":5,"bed_str":"06:27","wake_str":"12:01"},"2025-11":{"avg_bed_h":4.35,"avg_wake_h":11.28,"sd_bed":2.27,"n":13,"bed_str":"04:21","wake_str":"11:16"},"2025-12":{"avg_bed_h":4.3,"avg_wake_h":9.9,"sd_bed":2.51,"n":9,"bed_str":"04:17","wake_str":"09:54"},"2026-01":{"avg_bed_h":4.31,"avg_wake_h":10.72,"sd_bed":1.53,"n":20,"bed_str":"04:18","wake_str":"10:42"},"2026-02":{"avg_bed_h":5.28,"avg_wake_h":10.54,"sd_bed":3.56,"n":17,"bed_str":"05:16","wake_str":"10:32"},"2026-03":{"avg_bed_h":5.47,"avg_wake_h":10.34,"sd_bed":5.37,"n":24,"bed_str":"05:28","wake_str":"10:20"},"2026-04":{"avg_bed_h":3.02,"avg_wake_h":8.58,"sd_bed":1.53,"n":16,"bed_str":"03:01","wake_str":"08:34"}},"projection":[{"m":"2026-05","chron":29.08,"bio_A":34.32,"bio_B":34.59},{"m":"2026-06","chron":29.16,"bio_A":34.36,"bio_B":34.9},{"m":"2026-07","chron":29.24,"bio_A":34.39,"bio_B":35.2},{"m":"2026-08","chron":29.33,"bio_A":34.43,"bio_B":35.51},{"m":"2026-09","chron":29.41,"bio_A":34.46,"bio_B":35.81},{"m":"2026-10","chron":29.49,"bio_A":34.49,"bio_B":36.12},{"m":"2026-11","chron":29.58,"bio_A":34.53,"bio_B":36.24},{"m":"2026-12","chron":29.66,"bio_A":34.56,"bio_B":36.37},{"m":"2027-01","chron":29.75,"bio_A":34.6,"bio_B":36.49},{"m":"2027-02","chron":29.83,"bio_A":34.63,"bio_B":36.62},{"m":"2027-03","chron":29.91,"bio_A":34.67,"bio_B":36.74},{"m":"2027-04","chron":29.99,"bio_A":34.7,"bio_B":36.87},{"m":"2027-05","chron":30.08,"bio_A":34.73,"bio_B":36.99},{"m":"2027-06","chron":30.16,"bio_A":34.77,"bio_B":37.12},{"m":"2027-07","chron":30.24,"bio_A":34.8,"bio_B":37.24},{"m":"2027-08","chron":30.33,"bio_A":34.84,"bio_B":37.37},{"m":"2027-09","chron":30.41,"bio_A":34.87,"bio_B":37.49},{"m":"2027-10","chron":30.49,"bio_A":34.91,"bio_B":37.62},{"m":"2027-11","chron":30.58,"bio_A":34.94,"bio_B":37.74},{"m":"2027-12","chron":30.66,"bio_A":34.97,"bio_B":37.87}],"lifetime_rate":1.183};
+var D=B.monthly,SLPM=B.sleep_raw,STIM=B.sleep_timing,PROJ=B.projection;
+var MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function lbl(m){return MN[parseInt(m.slice(5,7),10)-1]+"'"+m.slice(2,4);}
+var GC='rgba(0,0,0,0.06)',TC='rgba(0,0,0,0.38)';
+var ch={};
+function kill(id){if(ch[id]){ch[id].destroy();delete ch[id];}}
+
+function tip(){return{backgroundColor:'#ffffff',borderColor:'rgba(0,0,0,0.12)',borderWidth:1,titleColor:'#1a1714',bodyColor:'#6a6258',padding:10};}
+function baseOpts(mn,mx,yCb){
+  return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{...tip(),callbacks:{label:function(c){if(c.parsed.y==null)return null;return' '+c.dataset.label+': '+c.parsed.y.toFixed(1);}}}},
+    scales:{x:{ticks:{color:TC,font:{size:10},maxTicksLimit:14,maxRotation:0},grid:{color:GC}},
+      y:{min:mn,max:mx,ticks:{color:TC,font:{size:10.5},callback:yCb||function(v){return v;}},grid:{color:GC}}}};}
+function refL(val,label){return{label:label,data:D.map(function(){return val;}),borderColor:'rgba(0,212,160,0.35)',borderWidth:1.2,borderDash:[4,3],pointRadius:0,tension:0,fill:false};}
+function linReg(ys){
+  var n=ys.length;if(n<2)return ys.slice();
+  var sx=0,sy=0,sxy=0,sx2=0;
+  ys.forEach(function(y,i){sx+=i;sy+=y;sxy+=i*y;sx2+=i*i;});
+  var sl=(n*sxy-sx*sy)/(n*sx2-sx*sx),ic=(sy-sl*sx)/n;
+  return ys.map(function(_,i){return+(ic+sl*i).toFixed(3);});
+}
+function hFull(v){var h=((v%24)+24)%24;var hr=Math.floor(h);var mn=Math.round((h-hr)*60);var sfx=hr<12?'am':'pm';var d=hr%12||12;return d+':'+(mn<10?'0':'')+mn+sfx;}
+
+// ── GAP + PACE ──
+function buildGapPace(){
+  var rec=D.slice(-13);
+  var labs=rec.map(function(d){return lbl(d.m);});
+  var gaps=rec.map(function(d){return+(d.bio-d.chron).toFixed(2);});
+  kill('cGap');
+  var gOpts=baseOpts(3,8);
+  gOpts.plugins.tooltip.callbacks.label=function(c){return' Gap: +'+c.parsed.y.toFixed(2)+' yrs';};
+  ch['cGap']=new Chart(document.getElementById('cGap'),{type:'line',data:{labels:labs,datasets:[{
+    label:'Bio-age gap',data:gaps,borderColor:'#ff4f4f',borderWidth:2.5,tension:0.3,fill:true,
+    backgroundColor:'rgba(255,79,79,0.07)',
+    pointRadius:4,pointBackgroundColor:gaps.map(function(v){return v>6?'#ff4f4f':v>5?'#ffaa00':'#00d4a0';}),
+    pointBorderColor:'#ffffff',pointBorderWidth:1.5}]},options:gOpts});
+  // cPace removed
+}
+
+// ── MAIN CHART ──
+var YR_TXT={
+  all:'<b>Overall:</b> Bio age consistently above chronological. Sleep is the dominant driver (+2.4 yrs combined). Best sustained window was H2 2025 (avg +4.0 yrs), driven by pickleball and Jan 2025 HRV recovery. Dotted projections show two paths to Dec 2027: hold improvements (gap → +4.3) vs. drift continues (gap → +7.0+). Sleep consistency is the swing factor between the two scenarios.',
+  '2023':'<b>2023:</b> Best sleep schedule in the dataset — avg bedtime 01:18, SD ~1.2h. HRV 42ms, RHR 70→62 bpm. VO₂ entered in May at 33.2 — immediate bio-age spike. H2 better than H1 across all metrics.',
+  '2024':'<b>2024:</b> Worst full year. VO₂ fell steadily to 32.6. HRV sat at 38–44ms — below 2023 levels. Aug 2024 (+7.3 yrs) is the dataset maximum. Watch coverage was sparse Apr–Aug (2–8 days/month) so data confidence is lower for that window, but the trend is consistent across all available readings.',
+  '2025':'<b>2025:</b> Clear two halves — H1 avg +6.1 yrs, H2 avg +4.3 yrs. Jan: HRV +12.5ms (largest single-month jump). Aug: pickleball peak — gap dropped 2.5 yrs in one month. Bedtime averaged 03:59 (3h later than 2023).',
+  '2026':'<b>2026 so far:</b> Steps 12,900/day — all-time best. But sleep at its worst: Mar SD 5.37h (dataset max, 24 nights). HRV/RHR drifting as pickleball fell to 7 sessions/month (vs 27 in Jul 2025).'
+};
+function setV(v,btn){
+  document.querySelectorAll('#mainTabs .tab').forEach(function(t){t.classList.remove('on');});btn.classList.add('on');
+  document.getElementById('yr-txt').innerHTML=YR_TXT[v]||YR_TXT['all'];
+  var fd=v==='all'?D:D.filter(function(d){return d.m.startsWith(v);});
+  var showP=(v==='all'||v==='2026');
+  var labs=fd.map(function(d){return lbl(d.m);});
+  var bios=fd.map(function(d){return d.bio;});
+  var chr=fd.map(function(d){return d.chron;});
+  var pL=[],pA=[],pB=[],pC=[];
+  if(showP){PROJ.forEach(function(p){pL.push(lbl(p.m));pA.push(p.bio_A);pB.push(p.bio_B);pC.push(p.chron);});}
+  var aL=labs.concat(pL);
+  var bAct=bios.concat(pL.map(function(){return null;}));
+  var nF=fd.map(function(){return null;});
+  var dA=nF.slice();if(showP&&pA.length){dA[dA.length-1]=bios[bios.length-1];dA=dA.concat(pA);}else dA=dA.concat([]);
+  var dB=nF.slice();if(showP&&pB.length){dB[dB.length-1]=bios[bios.length-1];dB=dB.concat(pB);}else dB=dB.concat([]);
+  var cA=chr.concat(pC);
+  kill('cMain');
+  var opts=baseOpts(22,42);
+  opts.plugins.tooltip.callbacks.label=function(c){
+    if(c.parsed.y==null)return null;var isP=c.dataIndex>=fd.length;
+    if(c.datasetIndex===0)return' Bio: '+c.parsed.y.toFixed(1)+(isP?' (projected)':'');
+    if(c.datasetIndex===1)return isP?' A (hold improvements): '+c.parsed.y.toFixed(1):null;
+    if(c.datasetIndex===2)return isP?' B (drift continues): '+c.parsed.y.toFixed(1):null;
+    return' Chron: '+c.parsed.y.toFixed(1);
+  };
+  opts.plugins.tooltip.callbacks.afterBody=function(its){
+    var i=its[0].dataIndex;if(i>=fd.length)return['  — projected'];
+    var r=fd[i];var l=[];
+    if(r.hrv)l.push('  HRV: '+r.hrv+'ms');if(r.rhr)l.push('  RHR: '+r.rhr+' bpm');
+    if(r.vo2)l.push('  VO₂: '+r.vo2);if(r.steps)l.push('  Steps: '+Math.round(r.steps).toLocaleString()+'/day');
+    if(r.sleep_hrs)l.push('  Sleep: '+r.sleep_hrs+'h avg');return l;
+  };
+  ch['cMain']=new Chart(document.getElementById('cMain'),{type:'line',data:{labels:aL,datasets:[
+    {label:'Bio',data:bAct,borderColor:'#ff4f4f',borderWidth:2.5,pointRadius:3.5,pointHoverRadius:6,pointBackgroundColor:'#ff4f4f',pointBorderColor:'#ffffff',pointBorderWidth:1.5,tension:0,fill:false,spanGaps:false},
+    {label:'A',data:dA,borderColor:'rgba(255,79,79,0.45)',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.2,fill:false,spanGaps:false},
+    {label:'B',data:dB,borderColor:'rgba(255,170,0,0.45)',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.2,fill:false,spanGaps:false},
+    {label:'Chron',data:cA,borderColor:'#4da6ff',borderWidth:1.5,pointRadius:0,tension:0.1,fill:false}
+  ]},options:opts});
+}
+
+// ── SUB METRICS ──
+function buildSubs(){
+  var labs=D.map(function(d){return lbl(d.m);});
+  kill('cHrv');
+  ch['cHrv']=new Chart(document.getElementById('cHrv'),{type:'line',data:{labels:labs,datasets:[
+    {label:'HRV ms',data:D.map(function(d){return d.hrv;}),borderColor:'#00d4a0',borderWidth:2,pointRadius:2,pointBackgroundColor:'#00d4a0',tension:0.3,fill:true,backgroundColor:'rgba(0,212,160,0.06)',spanGaps:true},
+    refL(55,'ref')]},options:baseOpts(25,65)});
+  kill('cRhr');
+  ch['cRhr']=new Chart(document.getElementById('cRhr'),{type:'line',data:{labels:labs,datasets:[
+    {label:'RHR bpm',data:D.map(function(d){return d.rhr;}),borderColor:'#ff4f4f',borderWidth:2,pointRadius:2,pointBackgroundColor:'#ff4f4f',tension:0.3,fill:true,backgroundColor:'rgba(255,79,79,0.06)',spanGaps:true},
+    refL(58,'ref')]},options:baseOpts(50,76)});
+  kill('cVo2');
+  ch['cVo2']=new Chart(document.getElementById('cVo2'),{type:'line',data:{labels:labs,datasets:[
+    {label:'VO₂',data:D.map(function(d){return d.vo2;}),borderColor:'#ffaa00',borderWidth:2,pointRadius:2,pointBackgroundColor:'#ffaa00',tension:0.2,fill:true,backgroundColor:'rgba(255,170,0,0.06)',spanGaps:true},
+    refL(43,'ref')]},options:baseOpts(28,47)});
+  kill('cStp');
+  // Job era bands for steps chart
+  var JOBS_STATIC=[
+    {name:'HighRadius', start:'2019-06',end:'2022-09',color:'rgba(100,150,220,0.07)',border:'#4a80c0',short:'HighRadius'},
+    {name:'HighRadius',  start:'2019-06',end:'2022-09',color:'rgba(100,150,220,0.07)',border:'#4a80c0',short:'HighRadius (pre-data)'},
+    {name:'BrowserStack',start:'2022-10',end:'2024-05',color:'rgba(26,95,160,0.08)', border:'#1a5fa0',short:'BrowserStack'},
+    {name:'Soroco',     start:'2024-05',end:'2024-12',color:'rgba(192,112,16,0.08)',border:'#c07010',short:'Soroco'},
+    {name:'Taloop',     start:'2025-01',end:'2025-10',color:'rgba(109,63,176,0.08)',border:'#6d3fb0',short:'Taloop'},
+    {name:'CeeVaa',     start:'2025-11',end:'2026-12',color:'rgba(10,122,80,0.08)', border:'#0a7a50',short:'CeeVaa'}
+  ];
+  var stepEraPlugin={id:'stepEra',beforeDraw:function(chart){
+    var ctx=chart.ctx,xA=chart.scales.x,yA=chart.scales.y;
+    if(!xA||!yA)return;
+    var yTop=yA.getPixelForValue(yA.max),yBot=yA.getPixelForValue(yA.min);
+    var nT=xA.ticks.length;
+    JOBS_STATIC.forEach(function(job){
+      var firstIdx=-1,lastIdx=-1;
+      labs.forEach(function(l,i){
+        var m=D[i]?D[i].m:'';
+        if(m>=job.start&&m<=job.end){if(firstIdx===-1)firstIdx=i;lastIdx=i;}
+      });
+      if(firstIdx===-1)return;
+      var step=nT>1?xA.width/(nT-1):xA.width;
+      var xL=xA.getPixelForValue(firstIdx)-step/2;
+      var xR=xA.getPixelForValue(lastIdx)+step/2;
+      ctx.save();
+      ctx.fillStyle=job.color;ctx.fillRect(xL,yTop,xR-xL,yBot-yTop);
+      ctx.strokeStyle=job.border;ctx.lineWidth=1.5;ctx.globalAlpha=0.6;
+      ctx.beginPath();ctx.moveTo(xL,yTop);ctx.lineTo(xL,yBot);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(xR,yTop);ctx.lineTo(xR,yBot);ctx.stroke();
+      ctx.globalAlpha=1;
+      ctx.fillStyle=job.border;ctx.font="500 8px 'DM Mono',monospace";
+      ctx.fillText(job.name,xL+4,yTop+12);
+      ctx.restore();
+    });
+  }};
+  ch['cStp']=new Chart(document.getElementById('cStp'),{type:'line',plugins:[stepEraPlugin],data:{labels:labs,datasets:[
+    {label:'Steps',data:D.map(function(d){return d.steps;}),borderColor:'#4da6ff',borderWidth:2,pointRadius:2,pointBackgroundColor:'#4da6ff',tension:0.3,fill:true,backgroundColor:'rgba(77,166,255,0.06)',spanGaps:true},
+    refL(8500,'ref')]},options:baseOpts(2000,17000,function(v){return v>=1000?Math.round(v/1000)+'k':v;})});
+}
+
+// ── SLEEP TREND (with inverted axis + duration) ──
+var SLEEP_TXT={
+  all:'Bedtime: 01:18 (2023) → 04:27 (2026) — 3.5h later. Wake time barely moved. Duration flat at ~5.5h. Sep 2025 outlier: bed 06:27 (likely travel). BrowserStack era had the most consistent schedule.',
+  '2023':'Best sleep year. Avg bed 01:18, wake 09:33, duration 5.5h. Oct–Nov: SD 1.05h — most consistent in full dataset. Nov duration: 6.5h — best month overall.',
+  '2024':'Jan–Mar: avg bed 01:00, consistent. Apr–Dec: almost no data (4 nights total). Soroco era — watch largely unworn.',
+  '2025':'Bedtime jumped 3h overnight vs 2024 — avg 03:59. Sep outlier: bed 06:27 (travel). Duration 5.6h avg. SD worsened through the year as startup hours took hold.',
+  '2026':'Best data coverage (16–24 nights/month), worst patterns. Avg bed 04:27, SD up to 5.37h in Mar. Duration 5.5h avg. Steps at all-time high — but sleep is the tradeoff.'
+};
+function setSleepV(v,btn){
+  document.querySelectorAll('#sleepTabs .tab').forEach(function(t){t.classList.remove('on');});btn.classList.add('on');
+  document.getElementById('sleep-txt').innerHTML=SLEEP_TXT[v]||SLEEP_TXT['all'];
+  var allM=Object.keys(STIM).sort();
+  var fil=v==='all'?allM:allM.filter(function(m){return m.startsWith(v);});
+  if(fil.length<2)fil=allM;
+  var labs=fil.map(lbl);
+  var beds=fil.map(function(m){return STIM[m].avg_bed_h;});
+  var wakes=fil.map(function(m){return STIM[m].avg_wake_h;});
+  var durs=fil.map(function(m){return SLPM[m]?SLPM[m].avg_hrs:null;});
+  var bTr=linReg(beds),wTr=linReg(wakes);
+  var dV=durs.map(function(d,i){return d!=null?{i:i,v:d}:null;}).filter(Boolean);
+  var dTr=durs.map(function(){return null;});
+  if(dV.length>=2){var dr=linReg(dV.map(function(d){return d.v;}));dV.forEach(function(d,j){dTr[d.i]=dr[j];});}
+  kill('cSleepTrend');
+
+  // Build work era annotations for this filtered month set
+  var JOBS=[
+    {name:'HighRadius',  start:'2019-06',end:'2022-09',color:'rgba(100,150,220,0.07)',border:'#4a80c0',short:'HighRadius (pre-data)'},
+    {name:'BrowserStack',start:'2022-10',end:'2024-05',color:'rgba(26,95,160,0.08)', border:'#1a5fa0',short:'BrowserStack'},
+    {name:'Soroco',      start:'2024-05',end:'2024-12',color:'rgba(192,112,16,0.08)',border:'#c07010',short:'Soroco'},
+    {name:'Taloop',      start:'2025-01',end:'2025-10',color:'rgba(109,63,176,0.08)',border:'#6d3fb0',short:'Taloop'},
+    {name:'CeeVaa',      start:'2025-11',end:'2026-12',color:'rgba(10,122,80,0.08)', border:'#0a7a50',short:'CeeVaa'}
+  ];
+  var annotations={};
+  JOBS.forEach(function(job){
+    // Find x indices in current filtered set
+    var firstIdx=-1,lastIdx=-1;
+    fil.forEach(function(m,i){
+      if(m>=job.start&&m<=job.end){if(firstIdx===-1)firstIdx=i;lastIdx=i;}
+    });
+    if(firstIdx===-1)return;
+    annotations['box_'+job.name]={
+      type:'box',xMin:firstIdx-0.5,xMax:lastIdx+0.5,
+      yMin:-3,yMax:14,
+      backgroundColor:job.color,borderColor:job.border,borderWidth:1,
+      label:{content:job.short,display:true,position:{x:'start',y:'start'},
+        color:job.border,font:{size:8.5,family:"'DM Mono',monospace",weight:'500'},
+        padding:{top:3,left:4}}
+    };
+  });
+
+  var sOpts={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{...tip(),callbacks:{label:function(c){
+      if(c.parsed.y==null)return null;
+      var m=fil[c.dataIndex];
+      if(c.datasetIndex===0)return' Bedtime: '+(STIM[m]?STIM[m].bed_str:'—')+(STIM[m]&&STIM[m].sd_bed?' (SD ±'+STIM[m].sd_bed+'h)':'');
+      if(c.datasetIndex===1)return' Bed trend: '+hFull(c.parsed.y);
+      if(c.datasetIndex===2)return' Wake: '+(STIM[m]?STIM[m].wake_str:'—');
+      if(c.datasetIndex===3)return' Wake trend: '+hFull(c.parsed.y);
+      if(c.datasetIndex===4)return c.parsed.y?' Duration: '+c.parsed.y.toFixed(1)+'h':null;
+      if(c.datasetIndex===5)return c.parsed.y?' Duration trend: '+c.parsed.y.toFixed(1)+'h':null;
+      return null;
+    }}}},
+    scales:{
+      x:{ticks:{color:TC,font:{size:9},maxTicksLimit:14,maxRotation:0},grid:{color:GC}},
+      y:{reverse:true,min:-2,max:13,
+        ticks:{color:TC,font:{size:9},stepSize:2,callback:function(v){
+          if(v===-2)return'10pm';if(v===0)return'12am';if(v===12)return'12pm';
+          if(v<0)return(24+v)+'pm';if(v<12)return v+'am';return(v-12)+'pm';
+        }},grid:{color:GC},
+        title:{display:true,text:'← Earlier / Later →',color:'rgba(255,107,136,0.4)',font:{size:8.5}}},
+      yD:{position:'right',min:3,max:10,
+        ticks:{color:'rgba(77,166,255,0.55)',font:{size:9},callback:function(v){return v+'h';}},
+        grid:{display:false},
+        title:{display:true,text:'Sleep hrs',color:'rgba(77,166,255,0.4)',font:{size:8.5}}}}};
+  var eraBandsPlugin={id:'eraBands',beforeDraw:function(chart){
+    var ctx=chart.ctx,xA=chart.scales.x,yA=chart.scales.y;
+    if(!xA||!yA)return;
+    var yTop=yA.getPixelForValue(yA.max),yBot=yA.getPixelForValue(yA.min);
+    var nT=xA.ticks.length;
+    JOBS.forEach(function(job){
+      var firstIdx=-1,lastIdx=-1;
+      fil.forEach(function(m,i){if(m>=job.start&&m<=job.end){if(firstIdx===-1)firstIdx=i;lastIdx=i;}});
+      if(firstIdx===-1)return;
+      var step=nT>1?xA.width/(nT-1):xA.width;
+      var xL=xA.getPixelForValue(firstIdx)-step/2;
+      var xR=xA.getPixelForValue(lastIdx)+step/2;
+      ctx.save();
+      ctx.fillStyle=job.color;ctx.fillRect(xL,yTop,xR-xL,yBot-yTop);
+      ctx.strokeStyle=job.border;ctx.lineWidth=1;ctx.globalAlpha=0.5;
+      ctx.beginPath();ctx.moveTo(xL,yTop);ctx.lineTo(xL,yBot);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(xR,yTop);ctx.lineTo(xR,yBot);ctx.stroke();
+      ctx.globalAlpha=1;
+      ctx.fillStyle=job.border;ctx.font="500 8px 'DM Mono',monospace";
+      ctx.fillText(job.name,xL+4,yTop+12);
+      ctx.restore();
+    });
+  }};
+  ch['cSleepTrend']=new Chart(document.getElementById('cSleepTrend'),{type:'line',plugins:[eraBandsPlugin],data:{labels:labs,datasets:[
+    {label:'Bed',data:beds,borderColor:'#ff6b88',borderWidth:2,pointRadius:4,pointBackgroundColor:'#ff6b88',pointBorderColor:'#ffffff',pointBorderWidth:1.5,tension:0.2,fill:false,yAxisID:'y'},
+    {label:'BedTrend',data:bTr,borderColor:'rgba(255,107,136,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0,fill:false,yAxisID:'y'},
+    {label:'Wake',data:wakes,borderColor:'#ffcc44',borderWidth:2,pointRadius:4,pointBackgroundColor:'#ffcc44',pointBorderColor:'#ffffff',pointBorderWidth:1.5,tension:0.2,fill:false,yAxisID:'y'},
+    {label:'WakeTrend',data:wTr,borderColor:'rgba(255,204,68,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0,fill:false,yAxisID:'y'},
+    {type:'bar',label:'Duration',data:durs,backgroundColor:'rgba(77,166,255,0.2)',borderColor:'rgba(77,166,255,0.5)',borderWidth:1,borderRadius:3,yAxisID:'yD'},
+    {label:'DurTrend',data:dTr,borderColor:'rgba(77,166,255,0.45)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:0,fill:false,yAxisID:'yD',spanGaps:true}
+  ]},options:sOpts});
+}
+
+// ── PICKLEBALL vs GAP ──
+function buildPbGap(){
+  var labs=D.map(function(d){return lbl(d.m);});
+  var gaps=D.map(function(d){return+(d.bio-d.chron).toFixed(2);});
+  var pbH=D.map(function(d){return d.pb_hrs||0;});
+  kill('cPbGap');
+  ch['cPbGap']=new Chart(document.getElementById('cPbGap'),{type:'bar',data:{labels:labs,datasets:[
+    {type:'bar',label:'PB hrs',data:pbH,backgroundColor:'rgba(77,166,255,0.2)',borderColor:'rgba(77,166,255,0.5)',borderWidth:1,yAxisID:'yR',order:2,borderRadius:3},
+    {type:'line',label:'Gap',data:gaps,borderColor:'#ff4f4f',borderWidth:2.5,
+     pointRadius:3,pointBackgroundColor:gaps.map(function(v){return v>6?'#ff4f4f':v>4.5?'#ffaa00':'#00d4a0';}),
+     pointBorderColor:'#ffffff',pointBorderWidth:1.5,tension:0.3,fill:true,backgroundColor:'rgba(255,79,79,0.06)',yAxisID:'yL',order:1}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{...tip(),callbacks:{label:function(c){
+      if(c.datasetIndex===0)return c.parsed.y>0?' PB: '+c.parsed.y.toFixed(1)+'h':null;
+      return' Gap: +'+c.parsed.y.toFixed(2)+' yrs';
+    }}}},
+    scales:{x:{ticks:{color:TC,font:{size:9},maxTicksLimit:14,maxRotation:0},grid:{color:GC}},
+      yL:{position:'left',min:2,max:9,ticks:{color:'rgba(255,79,79,0.6)',font:{size:9},callback:function(v){return'+'+v+'y';}},grid:{color:GC},title:{display:true,text:'Bio-age gap',color:'rgba(255,79,79,0.5)',font:{size:9}}},
+      yR:{position:'right',min:0,max:50,ticks:{color:'rgba(77,166,255,0.55)',font:{size:9},callback:function(v){return v+'h';}},grid:{display:false},title:{display:true,text:'PB hrs/mo',color:'rgba(77,166,255,0.5)',font:{size:9}}}}}});
+}
+
+// ── CONTRIBUTION TABLE ──
+function buildContrib(){
+  var l=D[D.length-1],p=l.parts;
+  var rows=[
+    {n:'Sleep consistency',v:'SD '+l.sleep_sd+'h',d:p.sleep_consist||0,mx:2.0,icon:'●'},
+    {n:'VO₂ Max',v:(l.vo2||0)+' ml/kg',d:p.vo2||0,mx:3.5,icon:'●'},
+    {n:'Sleep duration',v:(l.sleep_hrs||0).toFixed(1)+'h avg',d:p.sleep_dur||0,mx:2.5,icon:'●'},
+    {n:'Resting HR',v:(l.rhr||0)+' bpm',d:p.rhr||0,mx:3.0,icon:'●'},
+    {n:'HRV (SDNN)',v:(l.hrv||0)+'ms',d:p.hrv||0,mx:2.5,icon:'●'},
+    {n:'Daily steps',v:Math.round(l.steps).toLocaleString()+'/day',d:p.steps||0,mx:2.0,icon:'●'}
+  ];
+  rows.sort(function(a,b){return Math.abs(b.d)-Math.abs(a.d);});
+  var t=document.getElementById('ctbl');t.innerHTML='';
+  rows.forEach(function(r){
+    var pct=Math.min(100,Math.abs(r.d)/r.mx*100).toFixed(0);
+    var col=r.d>0.1?'#ff4f4f':r.d<-0.05?'#00d4a0':'#3a3a48';
+    var cls=r.d>0.1?'cdp':r.d<-0.05?'cdn':'cdz';
+    t.innerHTML+='<tr><td class="cn">'+r.n+'</td><td class="cv">'+r.v+'</td>'
+      +'<td><div class="cbg"><div class="cfill" style="width:'+pct+'%;background:'+col+'"></div></div></td>'
+      +'<td class="cd2 '+cls+'">'+(r.d>0?'+':'')+r.d.toFixed(1)+'y</td></tr>';
+  });
+}
+
+window.addEventListener('load',function(){
+  buildGapPace();
+  setV('all',document.querySelector('#mainTabs .tab.on'));
+  buildSubs();
+  setSleepV('all',document.querySelector('#sleepTabs .tab.on'));
+  buildPbGap();
+  buildContrib();
+});
+</script>
+</body>
+</html>
