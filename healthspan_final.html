@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthspan · Parth Bhatia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f5f0;--surface:#ffffff;--surface2:#f2ede6;--border:#e2dbd0;--border2:#cfc7bb;
+  --ink:#1c1814;--ink2:#4a4138;--ink3:#8c7e70;--ink4:#b8ad9e;
+  --red:#b83232;--red-bg:#fdf0f0;--green:#2a7a4f;--green-bg:#f0f8f4;
+  --amber:#9a6020;--amber-bg:#fdf6ee;--blue:#1e5a9a;--blue-bg:#eef4fc;
+  --pb:#2563a8;--pb-bg:#dce8f8;
+  --r:8px;--r2:12px;
+  --fd:'Playfair Display',Georgia,serif;
+  --fb:'Nunito Sans','Helvetica Neue',sans-serif;
+  --fm:'DM Mono','Courier New',monospace;
+}
+html{background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
+body{max-width:1120px;margin:0 auto;padding:44px 28px 80px}
+
+.hdr{display:grid;grid-template-columns:1fr auto;align-items:end;gap:20px;border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:32px}
+.hdr-tag{font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.hdr h1{font-family:var(--fd);font-size:38px;font-weight:400;line-height:1.05;letter-spacing:-.5px}
+.hdr h1 em{font-style:italic;color:var(--red)}
+.hdr-meta{font-family:var(--fm);font-size:10px;color:var(--ink3);line-height:2.1;text-align:right}
+.hdr-meta b{color:var(--ink2);font-weight:500}
+
+.sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:.5px solid var(--border);padding-bottom:7px;margin:34px 0 16px}
+.sh-t{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3)}
+.sh-n{font-family:var(--fm);font-size:9px;color:var(--ink4)}
+
+.hero{display:grid;grid-template-columns:repeat(4,1fr);border:.5px solid var(--border2);border-radius:var(--r2);overflow:hidden;margin-bottom:26px}
+.hc{padding:20px 18px 16px;background:var(--surface);border-right:.5px solid var(--border)}
+.hc:last-child{border-right:none}
+.hc.dk{background:var(--ink)}
+.hc-l{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px}
+.hc.dk .hc-l{color:rgba(255,255,255,.38)}
+.hc-v{font-family:var(--fd);font-size:32px;line-height:1;letter-spacing:-.5px;color:var(--ink)}
+.hc.dk .hc-v{color:#fff}
+.hc-v.r{color:var(--red)}.hc-v.g{color:var(--green)}.hc-v.a{color:var(--amber)}
+.hc-s{font-size:11px;color:var(--ink3);margin-top:5px;line-height:1.4}
+.hc.dk .hc-s{color:rgba(255,255,255,.38)}
+
+.yr-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.yr{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:14px 15px}
+.yr.best{border-color:#a8d4bc;background:#f3fbf6}
+.yr.worst{border-color:#e8c4c4;background:#fdf5f5}
+.yr-y{font-family:var(--fm);font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
+.yr-b{font-family:var(--fd);font-size:22px;line-height:1;color:var(--ink)}
+.yr-d{font-family:var(--fm);font-size:10.5px;font-weight:500;margin-top:4px}
+.yr-n{font-size:11px;color:var(--ink3);margin-top:5px;line-height:1.45}
+
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r2);padding:20px 22px;margin-bottom:13px}
+.ct{font-family:var(--fd);font-size:18px;font-weight:400;color:var(--ink);letter-spacing:-.2px;margin-bottom:3px}
+.cd{font-size:11.5px;color:var(--ink3);margin-bottom:14px;line-height:1.55}
+.cw{position:relative;width:100%}
+
+.tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.tab{font-family:var(--fm);font-size:9.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:.5px solid var(--border2);background:transparent;color:var(--ink3);cursor:pointer;transition:all .14s}
+.tab:hover{color:var(--ink2);background:var(--surface2)}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.leg{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:11px}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
+.ll{width:18px;height:2.5px;border-radius:1px;flex-shrink:0}
+.ld{width:20px;height:0;flex-shrink:0}
+.lb{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+
+.ev-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:13px}
+.ev{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:13px 14px;border-left:3px solid transparent}
+.ev.dn{border-left-color:var(--green)}.ev.up{border-left-color:var(--red)}
+.ev-tag{font-family:var(--fm);font-size:8.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;margin-bottom:5px}
+.ev.dn .ev-tag{color:var(--green)}.ev.up .ev-tag{color:var(--red)}
+.ev-ti{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.ev-b{font-size:11px;color:var(--ink3);line-height:1.55}
+
+.mtbl{width:100%;border-collapse:collapse}
+.mtbl tr{border-bottom:.5px solid var(--border)}
+.mtbl tr:last-child{border-bottom:none}
+.mtbl td{padding:9px 4px;font-size:12px;vertical-align:middle}
+.mn{width:105px;font-weight:500;color:var(--ink2)}
+.mv{width:95px;font-family:var(--fm);font-size:11px;color:var(--ink)}
+.mbg{background:var(--surface2);border-radius:2px;height:5px;overflow:hidden}
+.mfill{height:100%;border-radius:2px}
+.md{font-family:var(--fm);font-size:11px;width:46px;text-align:right;font-weight:500}
+.md.p{color:var(--red)}.md.n{color:var(--green)}.md.z{color:var(--ink4)}
+
+.pb-s{background:var(--pb-bg);border:.5px solid #b0cce8;border-radius:var(--r);padding:15px 18px;margin-bottom:13px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pbl{font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#3a70b8;margin-bottom:4px}
+.pbv{font-family:var(--fd);font-size:21px;color:var(--pb);line-height:1}
+.pbs{font-size:11px;color:#5888c8;margin-top:3px}
+
+.note{background:var(--surface2);border-radius:var(--r);padding:11px 15px;font-size:11px;color:var(--ink2);line-height:1.75;margin-bottom:13px;border-left:3px solid var(--border2)}
+.note b{color:var(--ink);font-weight:600}
+
+.fn{font-family:var(--fm);font-size:10px;color:var(--ink4);line-height:1.8;border-top:.5px solid var(--border);padding-top:14px;margin-top:34px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.hero,.card,.yr-row,.ev-g,.pb-s{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-tag">Personal Healthspan Report · Apple Watch SE2</div>
+    <h1>Biological Age Report<br><em>Parth Bhatia, 29</em></h1>
+  </div>
+  <div class="hdr-meta">
+    Born <b>Apr 17, 1997</b><br>
+    Dataset <b>Feb 2023 – Apr 2026</b><br>
+    Records <b>1,343,728</b><br>
+    Model <b>HRV + RHR + VO₂ + Steps · 6-mo rolling</b><br>
+    Generated <b>Apr 22, 2026</b>
+  </div>
+</div>
+
+<div class="sh"><span class="sh-t">01 · Current status</span><span class="sh-n">6-month rolling average · Apr 2026</span></div>
+<div class="hero">
+  <div class="hc">
+    <div class="hc-l">Chronological age</div>
+    <div class="hc-v">29.0</div>
+    <div class="hc-s">Apr 17, 1997</div>
+  </div>
+  <div class="hc dk">
+    <div class="hc-l">Biological age</div>
+    <div class="hc-v">31.9</div>
+    <div class="hc-s">6-month rolling estimate</div>
+  </div>
+  <div class="hc">
+    <div class="hc-l">Bio-delta</div>
+    <div class="hc-v a">+2.9 yrs</div>
+    <div class="hc-s">Older than calendar</div>
+  </div>
+  <div class="hc">
+    <div class="hc-l">Pace of aging</div>
+    <div class="hc-v" id="h-pace">—</div>
+    <div class="hc-s" id="h-sub">bio yrs / calendar yr</div>
+  </div>
+</div>
+
+<div class="sh"><span class="sh-t">02 · Year-by-year</span><span class="sh-n">Average biological age vs. chronological per year</span></div>
+<div class="yr-row">
+  <div class="yr">
+    <div class="yr-y">2023</div>
+    <div class="yr-b">29.6 avg</div>
+    <div class="yr-d" style="color:var(--amber)">+3.4 yrs delta</div>
+    <div class="yr-n">Good baseline. VO₂ appeared mid-year at 33.2 (fair), immediately adding penalty. H2 stabilised around +3 yrs. Steps modest at ~6.5k/day.</div>
+  </div>
+  <div class="yr worst">
+    <div class="yr-y">2024 — worst year</div>
+    <div class="yr-b">31.7 avg</div>
+    <div class="yr-d" style="color:var(--red)">+4.5 yrs delta</div>
+    <div class="yr-n">VO₂ fell to 32.6 by mid-year. HRV softened to 38–44ms. Watch wear patchy Apr–Aug. Delta peaked at +6.1 in Sep 2024 — worst reading in dataset.</div>
+  </div>
+  <div class="yr best">
+    <div class="yr-y">2025 — improving</div>
+    <div class="yr-b">31.6 avg</div>
+    <div class="yr-d" style="color:var(--amber)">+3.3 yrs delta</div>
+    <div class="yr-n">Jan brought the sharpest HRV jump (+12.5ms). Pickleball started June 22. H2 2025 avg +2.2 yrs — far better than H1 (+4.3). Clearest improvement arc.</div>
+  </div>
+  <div class="yr">
+    <div class="yr-y">2026 so far</div>
+    <div class="yr-b">31.5 avg</div>
+    <div class="yr-d" style="color:var(--amber)">+2.6 yrs delta</div>
+    <div class="yr-n">Lowest delta of any period. Steps at 12,900+/day (top decile). HRV softening slightly (46.5→44.6ms) as pickleball volume fell post-Jan.</div>
+  </div>
+</div>
+
+<div class="sh"><span class="sh-t">03 · Age trajectory</span><span class="sh-n">6-month rolling window per data point</span></div>
+<div class="card">
+  <div class="ct">Biological age vs. chronological age</div>
+  <div class="cd">Each point = 6-month rolling average of HRV, RHR, VO₂ Max, and daily steps. Hover any point for full metric detail. Tab to filter by year.</div>
+  <div class="tabs">
+    <button class="tab on" onclick="setV('all',this)">Overall</button>
+    <button class="tab" onclick="setV('2023',this)">2023</button>
+    <button class="tab" onclick="setV('2024',this)">2024</button>
+    <button class="tab" onclick="setV('2025',this)">2025</button>
+    <button class="tab" onclick="setV('2026',this)">2026</button>
+  </div>
+  <div class="leg">
+    <span class="li"><span class="ll" style="background:#b83232"></span>Biological age</span>
+    <span class="li"><span class="ld" style="border-top:2px dashed rgba(184,50,50,.35)"></span>Trend</span>
+    <span class="li"><span class="ll" style="background:#2563a8"></span>Chronological age</span>
+  </div>
+  <div class="cw" style="height:300px"><canvas id="cMain"></canvas></div>
+  <div id="yr-txt" style="margin-top:16px;font-size:12px;color:var(--ink2);line-height:1.85;padding-top:14px;border-top:.5px solid var(--border)"></div>
+</div>
+
+<div class="sh"><span class="sh-t">04 · Key inflection points</span><span class="sh-n">Top 3 improvements and top 3 worsening — data-derived</span></div>
+<div class="ev-g">
+  <div class="ev dn">
+    <div class="ev-tag">Best shift · −2.5 yrs</div>
+    <div class="ev-ti">Jul → Aug 2025</div>
+    <div class="ev-b">VO₂Max jumped 33.8→38.0 as peak pickleball hit (21 sessions, 36h). Steps crossed 10k. RHR −1.1 bpm. Bio-delta dropped +5.1→+2.5 in a single month — sharpest single improvement in the dataset.</div>
+  </div>
+  <div class="ev dn">
+    <div class="ev-tag">Recovery · −2.3 yrs</div>
+    <div class="ev-ti">Dec 2024 → Jan 2025</div>
+    <div class="ev-b">HRV surged 38.7→51.2ms — largest single-month HRV jump (+12.5ms). RHR hit 58.2 bpm, dataset low. Bio-delta fell +5.7→+3.4. Cause unclear: possibly rest after a high-load period.</div>
+  </div>
+  <div class="ev dn">
+    <div class="ev-tag">Early lift · −1.4 yrs</div>
+    <div class="ev-ti">Jun → Jul 2023</div>
+    <div class="ev-b">VO₂Max improved 33.2→36.9 as Watch accumulated sufficient outdoor activity data. RHR eased. First period where bio age dipped toward 30.0.</div>
+  </div>
+  <div class="ev up">
+    <div class="ev-tag">VO₂ shock · +2.9 yrs</div>
+    <div class="ev-ti">Apr → May 2023</div>
+    <div class="ev-b">VO₂Max first entered the model at 33.2 ml/kg/min — immediately adding +3.15 years. Not a real worsening; the model finally had cardio data to work with. The penalty was real, the change was not.</div>
+  </div>
+  <div class="ev up">
+    <div class="ev-tag">Steady slide · +3.4 yrs</div>
+    <div class="ev-ti">Apr → Sep 2024</div>
+    <div class="ev-b">VO₂Max declined from 37.9 to 32.6 across 5 months. HRV averaged 38–44ms. Watch coverage was sparse (2–8 days/month Apr–Aug), but the trend holds across all available readings.</div>
+  </div>
+  <div class="ev up">
+    <div class="ev-tag">2026 drift · +0.9 yr</div>
+    <div class="ev-ti">Jan → Apr 2026</div>
+    <div class="ev-b">HRV declining 46.5→44.6ms, RHR edging up 61.2→63.6 bpm as pickleball volume dropped. Steps remain strong (12,900/day). Bio-delta grew +2.0→+2.9 — manageable but the direction is wrong.</div>
+  </div>
+</div>
+
+<div class="sh"><span class="sh-t">05 · Metric trends</span><span class="sh-n">Monthly values · green dashed = optimal reference</span></div>
+<div class="g2">
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">HRV (SDNN)</div>
+    <div class="cd">Monthly avg · Reference ≥55ms · Current 6-mo avg: 44.6ms</div>
+    <div class="cw" style="height:155px"><canvas id="cHrv"></canvas></div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">Resting heart rate</div>
+    <div class="cd">Monthly avg · Reference ≤58 bpm · Current 6-mo avg: 63.6 bpm</div>
+    <div class="cw" style="height:155px"><canvas id="cRhr"></canvas></div>
+  </div>
+</div>
+<div style="height:10px"></div>
+<div class="g2">
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">VO₂ Max</div>
+    <div class="cd">Last known per month · Reference 43+ ml/kg/min · Current: 36.7</div>
+    <div class="cw" style="height:155px"><canvas id="cVo2"></canvas></div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">Daily steps</div>
+    <div class="cd">Monthly avg · Reference 8,500+ · Current 6-mo avg: 12,900/day</div>
+    <div class="cw" style="height:155px"><canvas id="cStp"></canvas></div>
+  </div>
+</div>
+<div style="height:10px"></div>
+<div class="card">
+  <div class="ct">Sleep duration</div>
+  <div class="cd">Monthly average (where recorded) · Green band = 7–9h optimal · Data available from Sep 2024 onward only — not recorded earlier in this export.</div>
+  <div class="leg">
+    <span class="li"><span class="ll" style="background:#2563a8"></span>Avg hrs/night</span>
+    <span class="li"><span style="display:inline-block;width:14px;height:10px;background:rgba(42,122,79,.1);border:1px solid rgba(42,122,79,.3);border-radius:2px;flex-shrink:0"></span>7–9h optimal zone</span>
+  </div>
+  <div class="cw" style="height:180px"><canvas id="cSlp"></canvas></div>
+</div>
+
+<div class="sh"><span class="sh-t">06 · Pickleball impact</span><span class="sh-n">86 sessions · Jun 22 2025 – Apr 2026 · avg 82 min/session</span></div>
+<div class="pb-s">
+  <div><div class="pbl">HRV improvement</div><div class="pbv">+5.9 ms</div><div class="pbs">43.7 → 49.6 (pre vs active era)</div></div>
+  <div><div class="pbl">RHR improvement</div><div class="pbv">−5.3 bpm</div><div class="pbs">63.1 → 57.8 bpm (peak era)</div></div>
+  <div><div class="pbl">VO₂ Max shift</div><div class="pbv">+4.6</div><div class="pbs">33.4 → 38.0 (peak months)</div></div>
+  <div><div class="pbl">Bio-delta shift</div><div class="pbv">−2.5 yrs</div><div class="pbs">Peak: Jul → Aug 2025</div></div>
+</div>
+<div class="card">
+  <div class="ct">RHR, HRV and pickleball volume</div>
+  <div class="cd">Bars = pickleball hours/month. Dose-response visible: peak Jul–Sep 2025 (55 sessions, 78h) = lowest RHR in full dataset (57.6–58.0 bpm).</div>
+  <div class="leg">
+    <span class="li"><span class="ll" style="background:#b83232"></span>RHR bpm (left axis)</span>
+    <span class="li"><span class="ld" style="border-top:2px dashed #2a7a4f"></span>HRV ms (right axis)</span>
+    <span class="li"><span class="lb" style="background:rgba(37,99,168,.25);border:1px solid rgba(37,99,168,.45)"></span>Pickleball hrs/month</span>
+  </div>
+  <div class="cw" style="height:230px"><canvas id="cPb"></canvas></div>
+</div>
+
+<div class="sh"><span class="sh-t">07 · Current drivers</span><span class="sh-n">Apr 2026 · metric contributions to bio-delta</span></div>
+<div class="g2">
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">Bio-age contributions</div>
+    <div class="cd">Each metric vs. optimal reference. Bar = magnitude. Positive = adding years to bio age.</div>
+    <table class="mtbl" id="ctbl"></table>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ct">What closes the remaining gap</div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.85">
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:.5px solid var(--border)"><b style="color:var(--red)">VO₂ Max · +2.0 yrs</b> — 36.7 ml/kg/min is "fair" for your age. AHA optimal for active 29yo male is 43+. Each +1 unit = −0.32 bio years. Zone 4–5 sessions beyond pickleball are the unlock.</div>
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:.5px solid var(--border)"><b style="color:var(--amber)">HRV · +0.8 yrs</b> — 44.6ms vs 55ms reference. Was 51ms in Jan 2025. Sleep quality, training load, and alcohol all move this. Recoverable quickly.</div>
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:.5px solid var(--border)"><b style="color:var(--amber)">RHR · +0.9 yrs</b> — 63.6 bpm vs 58 reference. Hit 57.6 bpm during peak pickleball (Aug 2025). Volume is the driver.</div>
+      <div><b style="color:var(--green)">Steps · −0.8 yrs</b> — 12,900/day. Top decile for your age. This is your clearest strength in the model. Keep it.</div>
+    </div>
+  </div>
+</div>
+
+<div class="note" style="margin-top:13px"><b>Sleep not in current model:</b> Sleep data only exists from Sep 2024 in this export. Where available, it averages 5.5–6h — below the 7h optimal. Once you have consistent sleep data, adding sleep duration and bedtime SD as drivers would likely push the bio-delta up by ~1.5–2.0 years — meaning the current estimate is probably optimistic. Sleep consistency (WHOOP's primary driver) would be the largest single change to make.</div>
+
+<div class="fn">Model — Bio age = chron age + Σ metric deltas. HRV: asymmetric (below 55ms: +0.08/ms; above 55ms: −0.06/ms). RHR: 0.15 yrs/bpm above 58. VO₂Max: 0.32 yrs/unit below 43. Steps: tiered (≥10k=−0.8, ≥8.5k=−0.4, ≥6k=0, ≥4k=+0.8, &lt;4k=+1.8). Sleep where available: &lt;5h=+2.0, 5–6h=+1.2, 6–7h=+0.5, 7–9h=0. 6-month rolling windows. Sources: WHOOP Healthspan White Paper 2025; Nes et al. 2013 HRV all-cause mortality; Paluch et al. 2022 steps; AHA VO₂Max fitness categories. Not a medical assessment.</div>
+
+<script>
+const D = [{"m":"2023-01","chron":25.75,"bio":26.55,"delta":0.8,"rhr":null,"hrv":null,"vo2":null,"steps":4212.0,"sleep":null,"sleep_sd":null,"parts":{"steps":0.8},"pb_hrs":0},{"m":"2023-02","chron":25.83,"bio":29.42,"delta":3.59,"rhr":70.0,"hrv":42.6,"vo2":null,"steps":4549.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":1.8,"hrv":0.99,"steps":0.8},"pb_hrs":0},{"m":"2023-03","chron":25.91,"bio":29.31,"delta":3.4,"rhr":67.0,"hrv":39.5,"vo2":null,"steps":5813.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":1.36,"hrv":1.24,"steps":0.8},"pb_hrs":0},{"m":"2023-04","chron":25.99,"bio":28.97,"delta":2.98,"rhr":68.0,"hrv":36.5,"vo2":null,"steps":6127.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":1.5,"hrv":1.48,"steps":0.0},"pb_hrs":0},{"m":"2023-05","chron":26.08,"bio":31.97,"delta":5.89,"rhr":67.0,"hrv":37.6,"vo2":33.16,"steps":6330.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":1.35,"hrv":1.39,"vo2":3.15,"steps":0.0},"pb_hrs":0},{"m":"2023-06","chron":26.16,"bio":31.33,"delta":5.17,"rhr":64.1,"hrv":41.1,"vo2":33.16,"steps":6673.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.91,"hrv":1.11,"vo2":3.15,"steps":0.0},"pb_hrs":0},{"m":"2023-07","chron":26.24,"bio":29.98,"delta":3.74,"rhr":63.0,"hrv":42.1,"vo2":36.89,"steps":7942.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.75,"hrv":1.03,"vo2":1.96,"steps":0.0},"pb_hrs":0},{"m":"2023-08","chron":26.33,"bio":29.86,"delta":3.53,"rhr":63.2,"hrv":41.4,"vo2":37.79,"steps":8386.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.78,"hrv":1.09,"vo2":1.67,"steps":0.0},"pb_hrs":0},{"m":"2023-09","chron":26.41,"bio":29.75,"delta":3.34,"rhr":62.2,"hrv":41.9,"vo2":37.79,"steps":7285.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.62,"hrv":1.05,"vo2":1.67,"steps":0.0},"pb_hrs":0},{"m":"2023-10","chron":26.49,"bio":29.56,"delta":3.07,"rhr":62.2,"hrv":43.3,"vo2":38.3,"steps":7700.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.63,"hrv":0.93,"vo2":1.51,"steps":0.0},"pb_hrs":0},{"m":"2023-11","chron":26.58,"bio":29.11,"delta":2.53,"rhr":62.3,"hrv":42.8,"vo2":38.9,"steps":9623.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.64,"hrv":0.97,"vo2":1.31,"steps":-0.4},"pb_hrs":0},{"m":"2023-12","chron":26.66,"bio":29.1,"delta":2.44,"rhr":63.1,"hrv":41.5,"vo2":38.65,"steps":10739.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.77,"hrv":1.08,"vo2":1.39,"steps":-0.8},"pb_hrs":0},{"m":"2024-01","chron":26.75,"bio":29.59,"delta":2.84,"rhr":64.6,"hrv":40.5,"vo2":38.35,"steps":10872.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.99,"hrv":1.16,"vo2":1.49,"steps":-0.8},"pb_hrs":0},{"m":"2024-02","chron":26.83,"bio":29.76,"delta":2.93,"rhr":64.7,"hrv":40.7,"vo2":38.07,"steps":11295.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":1.01,"hrv":1.14,"vo2":1.58,"steps":-0.8},"pb_hrs":0},{"m":"2024-03","chron":26.91,"bio":29.64,"delta":2.73,"rhr":64.1,"hrv":42.0,"vo2":38.07,"steps":11800.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.91,"hrv":1.04,"vo2":1.58,"steps":-0.8},"pb_hrs":0},{"m":"2024-04","chron":27.0,"bio":29.73,"delta":2.73,"rhr":63.6,"hrv":41.9,"vo2":37.88,"steps":11267.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.84,"hrv":1.05,"vo2":1.64,"steps":-0.8},"pb_hrs":0},{"m":"2024-05","chron":27.08,"bio":30.85,"delta":3.77,"rhr":63.8,"hrv":42.4,"vo2":35.84,"steps":8986.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.86,"hrv":1.01,"vo2":2.29,"steps":-0.4},"pb_hrs":0},{"m":"2024-06","chron":27.16,"bio":31.92,"delta":4.76,"rhr":64.3,"hrv":41.9,"vo2":34.32,"steps":7304.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.94,"hrv":1.04,"vo2":2.78,"steps":0.0},"pb_hrs":0},{"m":"2024-07","chron":27.24,"bio":32.21,"delta":4.97,"rhr":63.4,"hrv":41.4,"vo2":33.39,"steps":6173.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.81,"hrv":1.08,"vo2":3.08,"steps":0.0},"pb_hrs":0},{"m":"2024-08","chron":27.33,"bio":32.7,"delta":5.37,"rhr":60.4,"hrv":43.8,"vo2":32.64,"steps":5354.0,"sleep":null,"sleep_sd":null,"parts":{"rhr":0.36,"hrv":0.9,"vo2":3.31,"steps":0.8},"pb_hrs":0},{"m":"2024-09","chron":27.41,"bio":33.51,"delta":6.1,"rhr":62.1,"hrv":37.9,"vo2":32.64,"steps":5102.0,"sleep":6.75,"sleep_sd":null,"parts":{"rhr":0.62,"hrv":1.37,"vo2":3.31,"steps":0.8},"pb_hrs":0},{"m":"2024-10","chron":27.5,"bio":33.37,"delta":5.87,"rhr":60.9,"hrv":38.4,"vo2":32.64,"steps":4942.0,"sleep":6.75,"sleep_sd":null,"parts":{"rhr":0.43,"hrv":1.33,"vo2":3.31,"steps":0.8},"pb_hrs":0},{"m":"2024-11","chron":27.58,"bio":33.42,"delta":5.84,"rhr":60.6,"hrv":38.2,"vo2":32.64,"steps":5517.0,"sleep":6.75,"sleep_sd":null,"parts":{"rhr":0.38,"hrv":1.34,"vo2":3.31,"steps":0.8},"pb_hrs":0},{"m":"2024-12","chron":27.66,"bio":33.4,"delta":5.74,"rhr":60.1,"hrv":38.7,"vo2":32.64,"steps":5588.0,"sleep":6.75,"sleep_sd":null,"parts":{"rhr":0.32,"hrv":1.31,"vo2":3.31,"steps":0.8},"pb_hrs":0},{"m":"2025-01","chron":27.75,"bio":31.16,"delta":3.41,"rhr":58.2,"hrv":51.2,"vo2":33.36,"steps":6696.0,"sleep":5.96,"sleep_sd":null,"parts":{"rhr":0.03,"hrv":0.3,"vo2":3.08,"steps":0.0},"pb_hrs":0},{"m":"2025-02","chron":27.83,"bio":31.33,"delta":3.5,"rhr":59.0,"hrv":51.6,"vo2":33.36,"steps":6423.0,"sleep":5.96,"sleep_sd":null,"parts":{"rhr":0.15,"hrv":0.28,"vo2":3.08,"steps":0.0},"pb_hrs":0},{"m":"2025-03","chron":27.91,"bio":31.5,"delta":3.59,"rhr":59.2,"hrv":51.0,"vo2":33.36,"steps":6128.0,"sleep":5.96,"sleep_sd":null,"parts":{"rhr":0.19,"hrv":0.32,"vo2":3.08,"steps":0.0},"pb_hrs":0},{"m":"2025-04","chron":27.99,"bio":31.98,"delta":3.99,"rhr":60.8,"hrv":48.9,"vo2":33.36,"steps":6210.0,"sleep":5.82,"sleep_sd":null,"parts":{"rhr":0.42,"hrv":0.49,"vo2":3.08,"steps":0.0},"pb_hrs":0},{"m":"2025-05","chron":28.08,"bio":33.04,"delta":4.96,"rhr":61.6,"hrv":48.4,"vo2":33.36,"steps":5907.0,"sleep":5.85,"sleep_sd":null,"parts":{"rhr":0.54,"hrv":0.53,"vo2":3.08,"steps":0.8},"pb_hrs":0},{"m":"2025-06","chron":28.16,"bio":32.37,"delta":4.21,"rhr":61.4,"hrv":47.4,"vo2":33.36,"steps":6025.0,"sleep":5.98,"sleep_sd":null,"parts":{"rhr":0.52,"hrv":0.61,"vo2":3.08,"steps":0.0},"pb_hrs":6.3},{"m":"2025-07","chron":28.24,"bio":33.31,"delta":5.07,"rhr":61.3,"hrv":46.5,"vo2":33.36,"steps":5880.0,"sleep":5.76,"sleep_sd":null,"parts":{"rhr":0.5,"hrv":0.68,"vo2":3.08,"steps":0.8},"pb_hrs":29.3},{"m":"2025-08","chron":28.33,"bio":30.87,"delta":2.54,"rhr":60.2,"hrv":47.5,"vo2":37.96,"steps":6999.0,"sleep":5.63,"sleep_sd":null,"parts":{"rhr":0.33,"hrv":0.6,"vo2":1.61,"steps":0.0},"pb_hrs":36.1},{"m":"2025-09","chron":28.41,"bio":31.03,"delta":2.62,"rhr":60.2,"hrv":46.6,"vo2":37.96,"steps":8306.0,"sleep":5.57,"sleep_sd":null,"parts":{"rhr":0.33,"hrv":0.67,"vo2":1.61,"steps":0.0},"pb_hrs":13.2},{"m":"2025-10","chron":28.5,"bio":30.6,"delta":2.1,"rhr":59.6,"hrv":46.8,"vo2":37.96,"steps":8536.0,"sleep":5.64,"sleep_sd":null,"parts":{"rhr":0.24,"hrv":0.65,"vo2":1.61,"steps":-0.4},"pb_hrs":12.5},{"m":"2025-11","chron":28.58,"bio":30.6,"delta":2.02,"rhr":59.4,"hrv":47.5,"vo2":37.96,"steps":9350.0,"sleep":5.74,"sleep_sd":null,"parts":{"rhr":0.21,"hrv":0.6,"vo2":1.61,"steps":-0.4},"pb_hrs":5.1},{"m":"2025-12","chron":28.66,"bio":30.76,"delta":2.1,"rhr":59.8,"hrv":47.3,"vo2":37.96,"steps":9698.0,"sleep":5.62,"sleep_sd":null,"parts":{"rhr":0.27,"hrv":0.62,"vo2":1.61,"steps":-0.4},"pb_hrs":0},{"m":"2026-01","chron":28.75,"bio":30.73,"delta":1.98,"rhr":61.2,"hrv":46.5,"vo2":37.96,"steps":10124.0,"sleep":5.73,"sleep_sd":null,"parts":{"rhr":0.49,"hrv":0.68,"vo2":1.61,"steps":-0.8},"pb_hrs":0.9},{"m":"2026-02","chron":28.83,"bio":31.58,"delta":2.75,"rhr":62.8,"hrv":44.9,"vo2":36.67,"steps":11067.0,"sleep":5.61,"sleep_sd":null,"parts":{"rhr":0.72,"hrv":0.8,"vo2":2.03,"steps":-0.8},"pb_hrs":1.5},{"m":"2026-03","chron":28.91,"bio":31.74,"delta":2.83,"rhr":63.4,"hrv":45.0,"vo2":36.67,"steps":11430.0,"sleep":5.59,"sleep_sd":null,"parts":{"rhr":0.81,"hrv":0.8,"vo2":2.03,"steps":-0.8},"pb_hrs":6.1},{"m":"2026-04","chron":28.99,"bio":31.89,"delta":2.9,"rhr":63.6,"hrv":44.6,"vo2":36.67,"steps":12956.0,"sleep":5.49,"sleep_sd":null,"parts":{"rhr":0.85,"hrv":0.83,"vo2":2.03,"steps":-0.8},"pb_hrs":6.7}];
+
+const MNAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function lbl(m){ return MNAMES[parseInt(m.slice(5,7))-1] + " '" + m.slice(2,4); }
+
+const GC = 'rgba(0,0,0,0.055)';
+const TC = 'rgba(0,0,0,0.36)';
+
+function smth(arr, w){
+  w = w || 5;
+  return arr.map(function(_, i){
+    var s = Math.max(0, i - Math.floor(w/2));
+    var e = Math.min(arr.length, i + Math.ceil(w/2));
+    var sl = arr.slice(s, e).filter(function(v){ return v != null; });
+    return sl.length ? sl.reduce(function(a,b){return a+b;}, 0) / sl.length : null;
+  });
+}
+
+function baseOpts(yMin, yMax, yCb){
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        borderColor: 'rgba(0,0,0,0.1)',
+        borderWidth: 1,
+        titleColor: '#1c1814',
+        bodyColor: '#6a5e50',
+        padding: 10,
+        callbacks: {
+          label: function(c){
+            if(c.parsed.y == null) return null;
+            return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1);
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: TC, font: { size: 9.5 }, maxTicksLimit: 14, maxRotation: 0 },
+        grid: { color: GC }
+      },
+      y: {
+        min: yMin, max: yMax,
+        ticks: { color: TC, font: { size: 10 }, callback: yCb || function(v){ return v; } },
+        grid: { color: GC }
+      }
+    }
+  };
+}
+
+function refLine(val, lbl){
+  return {
+    label: lbl,
+    data: D.map(function(){ return val; }),
+    borderColor: 'rgba(42,122,79,0.5)',
+    borderWidth: 1.2,
+    borderDash: [4,3],
+    pointRadius: 0,
+    tension: 0,
+    fill: false
+  };
+}
+
+var charts = {};
+
+function destroyChart(id){
+  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+}
+
+var YR_TEXT = {
+  all: '<b>Overall:</b> Your biological age has tracked above chronological throughout the full dataset — the gap has never closed to zero. The clearest driver is a persistent VO₂Max gap. The brightest spot is your step count, which has been top-decile since late 2025. HRV and RHR both peaked in Jan 2025 and during peak pickleball (Jul–Sep 2025). The trend since Sep 2025 is the best sustained run in the full 3-year dataset.',
+  '2023': '<b>2023:</b> A reasonable baseline. HRV averaged 42ms, RHR improved from 68–70 bpm early to 62–63 by year end. VO₂Max arrived in May at 33.2 — immediately spiking the bio-age estimate. By H2 the model stabilised around +3 years. Steps modest at ~6.5k/day added a small ongoing penalty.',
+  '2024': '<b>2024:</b> Your worst year. VO₂Max fell steadily to 32.6 by mid-year. HRV softened to the 38–44ms range. Watch coverage was patchy Apr–Aug (2–8 days/month), which reduces confidence, but the trend is consistent. Bio-delta peaked at +6.1 in Sep 2024 — the worst reading across all 40 months of data.',
+  '2025': '<b>2025:</b> The recovery year. Jan 2025 brought the sharpest HRV jump in the dataset (+12.5ms), dropping bio-delta from +5.7 to +3.4. Pickleball began June 22 and the effect was measurable by August (delta +2.5, nearly halved). H2 2025 averaged +2.2 above calendar — significantly better than H1 (+4.3). Sleep data started appearing; averaging 5.6–6h shows this remains a drag not yet in the full model.',
+  '2026': '<b>2026 so far:</b> The delta of +2.6 average is the lowest period in the dataset. Steps are consistently strong (12,900+/day). However HRV is softening and RHR creeping up as pickleball volume dropped post-January. The direction since Nov 2025 peak is slightly wrong — not alarming yet, but worth watching.'
+};
+
+function setV(v, btn){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  btn.classList.add('on');
+  document.getElementById('yr-txt').innerHTML = YR_TEXT[v] || YR_TEXT['all'];
+
+  var fd = v === 'all' ? D : D.filter(function(d){ return d.m.startsWith(v); });
+  var labels = fd.map(function(d){ return lbl(d.m); });
+  var bios = fd.map(function(d){ return d.bio; });
+  var chrons = fd.map(function(d){ return d.chron; });
+  var trend = smth(bios, 5);
+
+  destroyChart('main');
+  var opts = baseOpts(24, 36);
+  opts.plugins.tooltip.callbacks.label = function(c){
+    if(c.datasetIndex === 1) return null;
+    var r = fd[c.dataIndex];
+    if(c.datasetIndex === 0) return ' Bio age: ' + c.parsed.y.toFixed(1) + '  (\u0394 ' + (r.delta > 0 ? '+' : '') + r.delta.toFixed(1) + ')';
+    return ' Chron age: ' + c.parsed.y.toFixed(1);
+  };
+  opts.plugins.tooltip.callbacks.afterBody = function(items){
+    var r = fd[items[0].dataIndex];
+    var lines = [];
+    if(r.hrv) lines.push('  HRV: ' + r.hrv + 'ms');
+    if(r.rhr) lines.push('  RHR: ' + r.rhr + ' bpm');
+    if(r.vo2) lines.push('  VO\u2082Max: ' + r.vo2);
+    if(r.steps) lines.push('  Steps: ' + Math.round(r.steps).toLocaleString() + '/day');
+    return lines;
+  };
+
+  charts['main'] = new Chart(document.getElementById('cMain'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Biological age',
+          data: bios,
+          borderColor: '#b83232',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#b83232',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1.5,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: 'Trend',
+          data: trend,
+          borderColor: 'rgba(184,50,50,0.32)',
+          borderWidth: 2,
+          borderDash: [6,4],
+          pointRadius: 0,
+          tension: 0.4,
+          fill: false
+        },
+        {
+          label: 'Chronological age',
+          data: chrons,
+          borderColor: '#2563a8',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.1,
+          fill: false
+        }
+      ]
+    },
+    options: opts
+  });
+}
+
+function buildSubs(){
+  var labels = D.map(function(d){ return lbl(d.m); });
+
+  destroyChart('hrv');
+  charts['hrv'] = new Chart(document.getElementById('cHrv'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'HRV ms', data: D.map(function(d){ return d.hrv; }), borderColor: '#2a7a4f', borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: '#2a7a4f', tension: 0.3, fill: false, spanGaps: true },
+        refLine(55, '55ms ref')
+      ]
+    },
+    options: baseOpts(25, 62)
+  });
+
+  destroyChart('rhr');
+  charts['rhr'] = new Chart(document.getElementById('cRhr'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'RHR bpm', data: D.map(function(d){ return d.rhr; }), borderColor: '#b83232', borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: '#b83232', tension: 0.3, fill: false, spanGaps: true },
+        refLine(58, '58 bpm ref')
+      ]
+    },
+    options: baseOpts(50, 76)
+  });
+
+  destroyChart('vo2');
+  charts['vo2'] = new Chart(document.getElementById('cVo2'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'VO\u2082Max', data: D.map(function(d){ return d.vo2; }), borderColor: '#9a6020', borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: '#9a6020', tension: 0.2, fill: false, spanGaps: true },
+        refLine(43, '43 ref')
+      ]
+    },
+    options: baseOpts(28, 46)
+  });
+
+  destroyChart('stp');
+  var stpOpts = baseOpts(2000, 17000, function(v){ return v >= 1000 ? Math.round(v/1000) + 'k' : v; });
+  charts['stp'] = new Chart(document.getElementById('cStp'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Steps/day', data: D.map(function(d){ return d.steps; }), borderColor: '#1e5a9a', borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: '#1e5a9a', tension: 0.3, fill: false, spanGaps: true },
+        refLine(8500, '8.5k ref')
+      ]
+    },
+    options: stpOpts
+  });
+}
+
+function buildSleep(){
+  var slpData = D.filter(function(d){ return d.sleep != null; });
+  var labels = slpData.map(function(d){ return lbl(d.m); });
+  var vals = slpData.map(function(d){ return d.sleep; });
+
+  destroyChart('slp');
+  var slpOpts = baseOpts(3.5, 10.5);
+  slpOpts.plugins.tooltip.callbacks.label = function(c){
+    if(c.datasetIndex > 0) return null;
+    var v = c.parsed.y;
+    var s = v >= 7 && v <= 9 ? 'optimal' : v >= 6 ? 'below target' : 'too short';
+    return ' Sleep: ' + v.toFixed(2) + 'h  (' + s + ')';
+  };
+
+  charts['slp'] = new Chart(document.getElementById('cSlp'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Sleep hrs',
+          data: vals,
+          borderColor: '#2563a8',
+          backgroundColor: 'rgba(37,99,168,0.08)',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: vals.map(function(v){ return v >= 7 ? '#2a7a4f' : v >= 6 ? '#9a6020' : '#b83232'; }),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1.5,
+          tension: 0.35,
+          fill: true
+        },
+        {
+          label: '7h floor',
+          data: slpData.map(function(){ return 7; }),
+          borderColor: 'rgba(42,122,79,0.4)',
+          borderWidth: 1,
+          borderDash: [4,3],
+          pointRadius: 0,
+          fill: false
+        },
+        {
+          label: '9h ceiling',
+          data: slpData.map(function(){ return 9; }),
+          borderColor: 'rgba(42,122,79,0.4)',
+          borderWidth: 1,
+          borderDash: [4,3],
+          pointRadius: 0,
+          fill: '-1',
+          backgroundColor: 'rgba(42,122,79,0.07)'
+        }
+      ]
+    },
+    options: slpOpts
+  });
+}
+
+function buildPB(){
+  var labels = D.map(function(d){ return lbl(d.m); });
+  var pbHrs = D.map(function(d){ return d.pb_hrs || 0; });
+  var rhrs = D.map(function(d){ return d.rhr; });
+  var hrvs = D.map(function(d){ return d.hrv; });
+
+  destroyChart('pb');
+  charts['pb'] = new Chart(document.getElementById('cPb'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'PB hrs',
+          data: pbHrs,
+          backgroundColor: 'rgba(37,99,168,0.18)',
+          borderColor: 'rgba(37,99,168,0.42)',
+          borderWidth: 1,
+          yAxisID: 'yB',
+          order: 3
+        },
+        {
+          type: 'line',
+          label: 'RHR bpm',
+          data: rhrs,
+          borderColor: '#b83232',
+          borderWidth: 2,
+          pointRadius: 2.5,
+          pointBackgroundColor: '#b83232',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'yL',
+          order: 1,
+          spanGaps: true
+        },
+        {
+          type: 'line',
+          label: 'HRV ms',
+          data: hrvs,
+          borderColor: '#2a7a4f',
+          borderWidth: 2,
+          borderDash: [5,4],
+          pointRadius: 2.5,
+          pointBackgroundColor: '#2a7a4f',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'yR',
+          order: 2,
+          spanGaps: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: 'rgba(0,0,0,0.1)',
+          borderWidth: 1,
+          titleColor: '#1c1814',
+          bodyColor: '#6a5e50',
+          padding: 10,
+          callbacks: {
+            label: function(c){
+              if(c.datasetIndex === 0) return c.parsed.y > 0 ? ' PB: ' + c.parsed.y.toFixed(1) + 'h' : null;
+              if(c.datasetIndex === 1) return c.parsed.y ? ' RHR: ' + c.parsed.y.toFixed(1) + ' bpm' : null;
+              return c.parsed.y ? ' HRV: ' + c.parsed.y.toFixed(1) + ' ms' : null;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: TC, font: { size: 9.5 }, maxTicksLimit: 14, maxRotation: 0 }, grid: { color: GC } },
+        yL: { position: 'left', min: 50, max: 76, ticks: { color: '#b83232', font: { size: 10 } }, grid: { color: GC }, title: { display: true, text: 'RHR (bpm)', color: '#b83232', font: { size: 10 } } },
+        yR: { position: 'right', min: 25, max: 62, ticks: { color: '#2a7a4f', font: { size: 10 } }, grid: { display: false }, title: { display: true, text: 'HRV (ms)', color: '#2a7a4f', font: { size: 10 } } },
+        yB: { display: false, min: 0, max: 80 }
+      }
+    }
+  });
+}
+
+function buildContrib(){
+  var latest = D[D.length - 1];
+  var p = latest.parts;
+  var rows = [
+    { n: 'HRV',         v: latest.hrv + 'ms',                                   d: p.hrv  || 0, mx: 2.5 },
+    { n: 'Resting HR',  v: latest.rhr + ' bpm',                                  d: p.rhr  || 0, mx: 3   },
+    { n: 'VO\u2082Max', v: latest.vo2 + ' ml/kg/min',                            d: p.vo2  || 0, mx: 4   },
+    { n: 'Daily steps', v: Math.round(latest.steps).toLocaleString() + '/day',   d: p.steps|| 0, mx: 2   }
+  ];
+  var t = document.getElementById('ctbl');
+  t.innerHTML = '';
+  rows.forEach(function(r){
+    var pct = Math.min(100, Math.abs(r.d) / r.mx * 100).toFixed(0);
+    var col = r.d > 0.1 ? '#b83232' : r.d < -0.05 ? '#2a7a4f' : '#c0b4a4';
+    var cls = r.d > 0.1 ? 'p' : r.d < -0.05 ? 'n' : 'z';
+    var sign = r.d > 0 ? '+' : '';
+    t.innerHTML += '<tr><td class="mn">' + r.n + '</td><td class="mv">' + r.v + '</td><td><div class="mbg"><div class="mfill" style="width:' + pct + '%;background:' + col + '"></div></div></td><td class="md ' + cls + '">' + sign + r.d.toFixed(1) + 'y</td></tr>';
+  });
+}
+
+function buildPace(){
+  var recent = D.slice(-13);
+  if(recent.length < 4) return;
+  var n = recent.length;
+  var x = recent.map(function(_, i){ return i; });
+  var y = recent.map(function(d){ return d.bio; });
+  var sx = x.reduce(function(a,b){ return a+b; }, 0);
+  var sy = y.reduce(function(a,b){ return a+b; }, 0);
+  var sxy = x.reduce(function(a,b,i){ return a + b*y[i]; }, 0);
+  var sx2 = x.reduce(function(a,b){ return a + b*b; }, 0);
+  var slope = (n*sxy - sx*sy) / (n*sx2 - sx*sx);
+  var ann = (slope * 12).toFixed(2);
+  var el = document.getElementById('h-pace');
+  var sub = document.getElementById('h-sub');
+  el.textContent = ann + '\u00d7';
+  if(ann < 0.8){ el.className = 'hc-v g'; sub.textContent = 'Aging slower than calendar'; }
+  else if(ann < 1.2){ el.className = 'hc-v a'; sub.textContent = 'Aging at ~calendar rate'; }
+  else { el.className = 'hc-v r'; sub.textContent = 'Aging faster than calendar'; }
+}
+
+// Init everything on load
+window.addEventListener('load', function(){
+  setV('all', document.querySelector('.tab.on'));
+  buildSubs();
+  buildSleep();
+  buildPB();
+  buildContrib();
+  buildPace();
+});
+</script>
+</body>
+</html>
